@@ -1,5 +1,6 @@
 accelerate
 diffusers
+jupyter
 matplotlib
 networkx
 numpy

@@ -263,7 +263,7 @@ def run(args):
     ##########################################
     
     test_shape = trimesh.load(
-        args.test_shape_path,
+        args.test_shape,
         process=False
     )
     test_shape = preprocessing_util.preprocessing_pipeline(
@@ -286,7 +286,7 @@ def run(args):
     ##########################################
     
     # get name of test shape
-    test_shape_name = os.path.basename(args.test_shape_path).replace('.off', '')
+    test_shape_name = os.path.basename(args.test_shape).replace('.off', '')
     save_path = f'results/template_stage_{test_shape_name}.pt'
     
     torch.save(p2p_maps_template, save_path)
@@ -301,7 +301,7 @@ if __name__ == '__main__':
     parser.add_argument('--experiment_name', type=str, required=True)
     parser.add_argument('--checkpoint_name', type=str, required=True)
     
-    parser.add_argument('--test_shape_path', type=str, required=True)
+    parser.add_argument('--test_shape', type=str, required=True)
     
     parser.add_argument('--num_iters_avg', type=int, default=128)
 
@@ -309,6 +309,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     
-    # python 0_template_stage.py --experiment_name ddpm_64 --checkpoint_name epoch_99 --test_shape_path data/example/off/tr_reg_082.off
+    # python 0_template_stage.py --experiment_name ddpm_64 --checkpoint_name epoch_99 --test_shape data/example/off/tr_reg_082.off
 
     run(args)
