@@ -155,8 +155,8 @@ def run(args):
         num_evecs=200, centering='bbox'
         )
     
-    p2p_template_1 = torch.load(args.p2p_template_1)
-    p2p_template_2 = torch.load(args.p2p_template_2)
+    p2p_template_1 = torch.load(args.p2p_template_1, weights_only=True)
+    p2p_template_2 = torch.load(args.p2p_template_2, weights_only=True)
     
     # load ground truth p2p maps as txt, then convert to torch tensor
     # subtract 1 to make the indices 0-based
@@ -202,9 +202,6 @@ if __name__ == '__main__':
         
     parser.add_argument('--num_samples_median', type=int, default=16)
     
-    # python 1_pairwise_stage.py --experiment_name ddpm_64 --test_shape_1 data/example/off/tr_reg_082.off --test_shape_2 data/example/off/tr_reg_096.off --p2p_template_1 results/template_stage_tr_reg_082.pt --p2p_template_2 results/template_stage_tr_reg_096.pt --gt_corr_1 data/example/corres/tr_reg_082.vts --gt_corr_2 data/example/corres/tr_reg_096.vts --num_samples_median 16
-
-
     args = parser.parse_args()
     
 

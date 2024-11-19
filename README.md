@@ -42,6 +42,6 @@ python 1_pairwise_stage.py --experiment_name ddpm_64 \
     --num_samples_median 4
 ```
 
-The template-wise and pair-wise maps will be saved in [results](results) folder.
+The template-wise and pair-wise maps will be saved in `results` folder.
 
 For visualization, check the `visualize_correspondence.ipynb`

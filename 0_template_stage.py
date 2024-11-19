@@ -227,7 +227,7 @@ def run(args):
     if "accelerate" in config and config["accelerate"]:
         accelerate.load_checkpoint_in_model(model, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors")
     else:
-        model.load_state_dict(torch.load(f"{exp_base_folder}/checkpoints/{checkpoint_name}"))
+        model.load_state_dict(torch.load(f"{exp_base_folder}/checkpoints/{checkpoint_name}", weights_only=True))
     
     model.to(device)
     
@@ -236,7 +236,8 @@ def run(args):
         **config["sign_net"]["net_params"]
         )        
     sign_corr_net.load_state_dict(torch.load(
-            f'checkpoints/sign_net/{config["sign_net"]["net_name"]}/{config["sign_net"]["n_iter"]}.pth'
+            f'checkpoints/sign_net/{config["sign_net"]["net_name"]}/{config["sign_net"]["n_iter"]}.pth',
+            weights_only=True
             ))
     sign_corr_net.to(device)
 
@@ -308,7 +309,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     
-    
-    # python 0_template_stage.py --experiment_name ddpm_64 --checkpoint_name epoch_99 --test_shape data/example/off/tr_reg_082.off
-
     run(args)
