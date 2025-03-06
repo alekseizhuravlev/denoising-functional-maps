@@ -37,7 +37,11 @@
     <script src="js/bootstrap.min.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css"/>  
+
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
 </head>
 
 <body>
@@ -53,7 +57,8 @@
     </div>
     <div class="row">
         <div class="col-md-12 text-center">
-            <ul class="list-inline">
+            <!-- List should be aligned by top -->
+            <ul class="list-inline text-center" style="display: flex; justify-content: center;">
                 <li>
                     <a style="text-decoration:none" href="https://alekseizhuravlev.github.io/">Aleksei Zhuravlev</a>
                     <br>University of Bonn
@@ -61,6 +66,7 @@
                 <li>
                     <a style="text-decoration:none" href="https://zorah.github.io/">Zorah Lähner</a>
                     <br>University of Bonn
+                    <br>Lamarr Institute
                 </li>
                 <li>
                     <a style="text-decoration:none" href="https://people.mpi-inf.mpg.de/~golyanik/">Vladislav Golyanik</a>
@@ -105,7 +111,7 @@
     <div class="row" style="padding-top: 10pt;">
         <div class="col-md-10 col-md-offset-1 text-center">
             <!-- <hr> -->
-            <img src="assets/Teaser_figure_upd.png" style="width:100%; padding-bottom:20px;">
+            <img src="assets/Teaser_figure_upd.jpg" style="width:100%; padding-bottom:20px;">
             <p>
                 We propose <b>DenoisFM</b>, a novel framework for predicting shape correspondences in the form of <b>functional maps</b> using <b>Denoising Diffusion Models</b>.<br>
                 <!-- (Left:) Challenging examples our method can handle, with color-coded correspondences.<br>
@@ -115,7 +121,8 @@
 
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <h3>Abstract</h3>
+            <hr>
+            <h3><b>Abstract</b></h3>
             <hr>
             <p class="text-justify">
                 Estimating correspondences between pairs of deformable shapes remains a challenging problem. 
@@ -134,9 +141,10 @@
 
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <h3>Method</h3>
             <hr>
-            <img src="assets/Method_figure_double_upd.png" style="width:100%">
+            <h3><b>Method</b></h3>
+            <hr>
+            <img src="assets/Method_figure_double_upd.jpg" style="width:100%">
             <p class="text-justify">
                 <br>
                 <b>(a) Functional map prediction using a diffusion model</b>. 
@@ -150,7 +158,7 @@
 
     <div class="row" style="padding-top: 20px;">
         <div class="col-md-10 col-md-offset-1">
-            <img src="assets/Method_sign_correction_upd.png" style="width:100%">
+            <img src="assets/Method_sign_correction_upd.jpg" style="width:100%">
             <p class="text-justify">
                 <br>
                 <b>(b) Learned sign correction</b>.
@@ -164,24 +172,230 @@
 
 
     <div class="row">
-        <div class="col-md-10 col-md-offset-1 text-center">
-            <h3>Results</h3>
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3><b>Training Data</b></h3>
+            <hr>
+            <p>Section in progress...</p>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3><b>Results</b>: Shape Correspondence</h3>
             <hr>
             <h3>Humans</h3>
-            <img src="assets/Website_humans.png" style="width:100%">
-            <p>
-                <br>
-                <!-- Comment -->
-                <br>
-            </p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <img src="assets/Humans_examples.jpg" class="img-responsive center-block" >
+        </div>
+    </div>
+
+    <div class="row"  style="margin-bottom: 20px;">
+        <div class="col-10 col-md-4 col-md-offset-4 text-center vertical-center">
+            <img src="assets/Humans_results.png" class="img-responsive center-block">
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-10 col-md-offset-1 text-center">
-            <h4>More examples coming soon! </h4>
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Humanoids</h3>
+            <hr>
         </div>
     </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center" >
+            <img src="assets/Website_humanoids_examples.jpg" class="img-responsive center-block" >
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-4 col-md-offset-4 text-center vertical-center">
+            <img src="assets/Website_humanoids_results.png" class="img-responsive center-block">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Animals</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center" >
+            <img src="assets/Website_animals_examples.jpg" class="img-responsive center-block" >
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 30px;">
+        <div class="col-10 col-md-4 col-md-offset-4 text-center vertical-center">
+            <img src="assets/Website_animals_results.png" class="img-responsive center-block">
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-justify">
+                We test our approach on the dataset containing <b>7 types of animals</b>.
+                For training, we use the fitted parameters of the SMAL parametric model and randomly vary the pose of 32 training animals, generating a total of 64,000 meshes.
+                As a result, we achieve <b>comparable performance</b> to the baselines.
+                Therefore, given enough training data, we believe our method can be applied to <b>any shape class</b>.
+            </p>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3><b>Results</b>: Sign Correction of Laplacian Eigenvectors</h3>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Accuracy</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 30px;">
+        <div class="col-10 col-md-4 col-md-offset-4 text-center vertical-center">
+            <img src="assets/Website_sign_corr_accuracy.png" class="img-responsive center-block">
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-justify">Given a set of eigenvectors with <b>random signs</b>,
+                our trained sign correction networks the <b>same basis combination</b> in \({>}95\%\) of cases on standard human datasets.
+            </p>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Distribution of Functional Maps</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <img src="assets/PCA_fmaps.jpg" class="img-responsive center-block" style="margin-bottom: 20px;">
+            <p class="text-justify">
+                For the FAUST dataset, we plot the first two PCA components for:</p>
+            <!-- Add a list with a), b), c) -->
+            <ol type="a" class="text-left">
+                <li>functional maps between each shape and the
+                    template <b>before</b> sign correction</li>
+                <li>functional maps <b>after</b> sign correction</li>
+                <li><b>conditioning</b> matrix after sign correction</li>
+            </ol>
+            <p class="text-justify">
+                Each entry is
+                colored according to its shape class. Note the <b>clusters</b> that form for the functional maps and conditioning matrices after sign correction.
+            </p>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Learned Correction Vectors</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center" >
+            <img src="assets/Website_correction_vectors.jpg" class="img-responsive center-block" style="margin-bottom: 10px;">
+            <br>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <p class="text-justify">
+                <!-- The learned correction vectors are used to resolve the <b>sign ambiguity</b> of eigenvectors of Laplace-Beltrami operator.
+                Since \(+\phi_i\) and \(-\phi_i\) are both valid eigenvectors, we project them onto the <b>learned correction vector</b> \(\varsigma_i\) and select the one with the <b>positive projection</b>. -->
+                We visualize several of the <b>learned correction vectors</b> \(\varsigma_i\), along with the corresponding eigenvectors \(\phi_i\).
+                The low-order correction vectors resemble the <b>eigenvectors themselves</b>, while the high-order ones are mostly concentrated in the <b>arm</b> and <b>hand</b> regions.
+            </p>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <hr>
+            <h3>Limitations</h3>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-10 col-md-10 col-md-offset-1 text-center" >
+            <img src="assets/Additional_Limitations.jpg" class="img-responsive center-block" >
+            <!-- Add a bullet list of limitations -->
+             <br>
+            <p class="text-justify">
+                The <b>main limitations</b> of our method include:
+            </p>
+             <ul class="text-left">
+                <li>Shapes with <b>significant differences</b> from the synthetic human data we used for training (an alien with large claws or a mouse).</li>
+                <li><b>Partial shapes</b> (with missing body parts).</li>
+                <li>Shapes with <b>challenging topology</b> that are not handled well by the functional map framework (holes, self-intersections).</li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- <div class="row">
+        <div class="col-md-10 col-md-offset-1 text-center">
+            <h4>More examples coming soon! </h4>
+            <p>Animals, Distribution of FMaps, correction vectors, comments</p>
+        </div>
+    </div> -->
+
+
+
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <h3>BibTeX</h3>
+            <hr>
+<pre id="bibtex">
+@misc{zhuravlev2025denoising,
+    title={Denoising Functional Maps: Diffusion Models for Shape Correspondence}, 
+    author={Aleksei Zhuravlev and Zorah Lähner and Vladislav Golyanik},
+    year={2025},
+    eprint={2503.01845},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    url={https://arxiv.org/abs/2503.01845}, 
+}
+</pre>
+        </div>
+    </div>
+    
 
     <!-- <div class="row">
         <div class="col-md-10 col-md-offset-1">

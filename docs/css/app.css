@@ -208,3 +208,12 @@ span.highlight {
   background-image: none !important;
   width: 5% !important;
 }
+
+.vertical-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px; 
+}
+
