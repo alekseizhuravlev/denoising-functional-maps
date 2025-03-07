@@ -113,7 +113,7 @@
             <!-- <hr> -->
             <img src="assets/Teaser_figure_upd.jpg" style="width:100%; padding-bottom:20px;">
             <p>
-                We propose <b>DenoisFM</b>, a novel framework for predicting shape correspondences in the form of <b>functional maps</b> using <b>Denoising Diffusion Models</b>.<br>
+                We propose <b>DenoisFM</b>, a novel method for predicting shape correspondences in the form of <b>functional maps</b> using <b>Denoising Diffusion Models</b>.<br>
                 <!-- (Left:) Challenging examples our method can handle, with color-coded correspondences.<br>
                  (Right:) By sequentially denoising samples of random noise, the diffusion model can predict the correct functional map between a pair of shapes. -->
             </p>
@@ -126,14 +126,15 @@
             <hr>
             <p class="text-justify">
                 Estimating correspondences between pairs of deformable shapes remains a challenging problem. 
-                Despite substantial progress, existing methods lack broad generalization capabilities and require domain-specific training data.
-                To address these limitations, we propose a fundamentally new approach to shape correspondence based on denoising diffusion models. 
-                In our method, a diffusion model learns to directly predict the functional map, i.e. a low-dimensional representation for a point-wise map between shapes.
+                Despite substantial progress, existing methods <b>lack</b> broad <b>generalization capabilities</b> and require category-specific training data.
+                To address these limitations, we propose a <b>fundamentally new approach</b> to shape correspondence based on denoising diffusion models. 
+                In our method, a <b>diffusion model</b> learns to directly <b>predict the functional map</b>, a low-dimensional representation of a point-wise map between shapes.
                 We use a large dataset of synthetic human meshes for training and employ two steps to reduce the number of functional maps that need to be learned.
-                First, the maps refer to a template rather than to shape pairs.
-                Second, the functional map is defined in a basis of eigenvectors of the Laplacian, which is not unique due to sign ambiguity.
-                Therefore, we introduce an unsupervised approach to select a specific basis by correcting the signs of eigenvectors based on surface features.
-                Our approach achieves competitive performance on standard human datasets, meshes with anisotropic connectivity, non-isometric humanoid shapes, as well as animals compared to existing descriptor-based and large-scale shape deformation methods. 
+                First, the maps refer to a <b>template</b> rather than shape pairs.
+                Second, the functional map is defined in a <b>basis of eigenvectors</b> of the Laplacian, which is <b>not unique</b> due to sign ambiguity.
+                Therefore, we introduce an unsupervised approach to <b>select a specific basis</b> by correcting the signs of eigenvectors based on surface features.
+                Our approach achieves competitive performance on standard <b>human</b> datasets, meshes with anisotropic connectivity, non-isometric <b>humanoid</b> shapes,
+                as well as <b>animals</b> compared to existing descriptor-based and large-scale shape deformation methods. 
             </p>
         </div>
 
@@ -147,10 +148,10 @@
             <img src="assets/Method_figure_double_upd.jpg" style="width:100%">
             <p class="text-justify">
                 <br>
-                <b>(a) Functional map prediction using a diffusion model</b>. 
-                For each unique shape in the dataset, we obtain surface features using a feature extractor, as well as a sign-corrected eigenbasis.
-                Both are used for conditional prediction of the template-wise functional map using a diffusion model. 
-                The pairwise functional maps are obtained through the map composition property, upsampled using ZoomOut, and converted to pointwise maps.
+                <u>(a) Functional map prediction using a diffusion model</u>. 
+                For each unique shape in the dataset, we obtain <b>surface features</b> using a feature extractor, as well as a <b>sign-corrected eigenbasis</b>.
+                Both are used for conditional prediction of the <b>template-wise functional map</b> using a diffusion model. 
+                The pairwise functional maps are obtained through the map composition property, upsampled using ZoomOut, and converted to <b>pointwise maps</b>.
                 <br>
             </p>
         </div>
@@ -161,10 +162,10 @@
             <img src="assets/Method_sign_correction_upd.jpg" style="width:100%">
             <p class="text-justify">
                 <br>
-                <b>(b) Learned sign correction</b>.
-                The eigenvectors returned by a numerical eigensolver have random signs.
-                To select a specific sign, we project the eigenvectors onto the learned correction vector obtained with a feature extractor, and make the projection positive. 
-                The sign correction network is trained in an unsupervised manner: learning to correct eigenvectors that have random signs. 
+                <u>(b) Learned sign correction</u>.
+                The <b>eigenvectors</b> returned by a numerical eigensolver have <b>random signs</b>.
+                To select a specific sign, we <b>project</b> the eigenvectors onto the <b>learned correction vector</b> obtained with a feature extractor, and make the projection positive. 
+                The sign correction network is trained in an unsupervised manner: learning to <b>correct</b> eigenvectors that have <b>random signs</b>. 
                 <br>
             </p>
         </div>
@@ -176,7 +177,35 @@
             <hr>
             <h3><b>Training Data</b></h3>
             <hr>
-            <p>Section in progress...</p>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center" >
+            <img src="assets/Website_surreal.jpg" class="img-responsive center-block" >
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-center">
+                230,000 synthetic <b>human meshes</b> from the SURREAL dataset.
+            </p>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-6 col-md-offset-3 text-center" >
+            <img src="assets/Website_smal.jpg" class="img-responsive center-block" >
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-center">
+                64,000 synthetic <b>animal meshes</b> generated by randomly varying the pose
+                of 32 training shapes from the SMAL dataset.
+            </p>
         </div>
     </div>
 
@@ -188,6 +217,9 @@
             <hr>
             <h3>Humans</h3>
             <hr>
+            <p class="text-center">
+                <b>Left</b>: source shape, <b>Right</b>: ours
+            </p>
         </div>
     </div>
 
@@ -197,11 +229,29 @@
         </div>
     </div>
 
-    <div class="row"  style="margin-bottom: 20px;">
-        <div class="col-10 col-md-4 col-md-offset-4 text-center vertical-center">
-            <img src="assets/Humans_results.png" class="img-responsive center-block">
+    <div class="row" style="margin-bottom: 20px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center" >
+            <img src="assets/Qualitative_examples_upd_cropped.jpg" class="img-responsive center-block" >
         </div>
     </div>
+
+    <div class="row"  style="margin-bottom: 20px;">
+        <div class="col-10 col-md-8 col-md-offset-2 text-center vertical-center">
+            <img src="assets/Humans_results_both.png" class="img-responsive center-block">
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-justify">
+                We evaluate our method on 3 <b>benchmark datasets</b>: FAUST, SCAPE, and SHREC'19.
+                We compare it to 2 categories of baselines: <b>large-scale shape deformation</b> methods and small <b>descriptor-based</b> models.
+                Our results are <i>on par</i> on all datasets,
+                demonstrating our <b>competitive performance</b> on diverse shape classes.
+            </p>
+        </div>
+    </div>
+
 
     <div class="row">
         <div class="col-10 col-md-10 col-md-offset-1 text-center" >
@@ -222,6 +272,22 @@
             <img src="assets/Website_humanoids_results.png" class="img-responsive center-block">
         </div>
     </div>
+
+    <div class="row" style="margin-bottom: 0px;">
+        <div class="col-10 col-md-10 col-md-offset-1">
+            <p class="text-justify">
+                To evaluate our model on unseen data, we use
+                the non-isometric DT4D dataset that consists of 9
+                <b>humanoid shape classes</b>. For training we use only human datasets,
+                and our evaluation can be viewed as a <b>zero-shot</b>
+                setting.
+                Our method achieves <b>accurate matching</b> for most shape classes 
+                in both intra- and inter-category settings, 
+                demonstrating the ability of our method to generalize to data <b>unseen during training</b>.
+            </p>
+        </div>
+    </div>
+
 
     <div class="row">
         <div class="col-10 col-md-10 col-md-offset-1 text-center" >
@@ -281,7 +347,9 @@
     <div class="row" style="margin-bottom: 0px;">
         <div class="col-10 col-md-10 col-md-offset-1">
             <p class="text-justify">Given a set of eigenvectors with <b>random signs</b>,
-                our trained sign correction networks the <b>same basis combination</b> in \({>}95\%\) of cases on standard human datasets.
+                our trained sign correction networks the <b>same basis combination</b> in \({>}95\%\)
+                of cases on standard human datasets: FAUST, SCAPE, SHREC'19, both regular (r) and anisotropic (a) versions.
+
             </p>
         </div>
     </div>
@@ -358,7 +426,7 @@
             <!-- Add a bullet list of limitations -->
              <br>
             <p class="text-justify">
-                The <b>main limitations</b> of our method include:
+                The main limitations of our method include:
             </p>
              <ul class="text-left">
                 <li>Shapes with <b>significant differences</b> from the synthetic human data we used for training (an alien with large claws or a mouse).</li>
@@ -382,6 +450,10 @@
         <div class="col-md-10 col-md-offset-1">
             <h3>BibTeX</h3>
             <hr>
+            <p style="margin-bottom: 20px;">
+                Thank you for your interest in our work! If you find our paper useful, please consider citing it:
+              </p>              
+
 <pre id="bibtex">
 @misc{zhuravlev2025denoising,
     title={Denoising Functional Maps: Diffusion Models for Shape Correspondence}, 
