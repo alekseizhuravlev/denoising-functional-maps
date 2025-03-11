@@ -1,7 +1,7 @@
 import torch
 
 
-def select_p2p_map(p2p_est_zo_sampled, verts_first, L_second, dist_first, num_samples_median):
+def select_p2p_map(p2p_est_zo_sampled, verts_first, L_second, dist_first, num_samples_selection):
 
     # dirichlet energy for each p2p map
     dirichlet_energy_list = []
@@ -17,22 +17,22 @@ def select_p2p_map(p2p_est_zo_sampled, verts_first, L_second, dist_first, num_sa
     # map with the lowest dirichlet energy
     # p2p_dirichlet = p2p_est_zo_sampled[sorted_idx_dirichlet[0]]
     
-    # median p2p map, using 3 maps with lowest dirichlet energy
-    p2p_median = get_median_p2p_map(
+    # medoid p2p map, using 3 maps with lowest dirichlet energy
+    p2p_medoid = get_medoid_p2p_map(
         p2p_est_zo_sampled[
-            sorted_idx_dirichlet[:num_samples_median]
+            sorted_idx_dirichlet[:num_samples_selection]
             ],
         dist_first
         )
     
-    return p2p_median
+    return p2p_medoid
 
 
-def get_median_p2p_map(p2p_maps, dist_x):
+def get_medoid_p2p_map(p2p_maps, dist_x):
     
     assert len(p2p_maps.shape) == 2, "p2p_maps should be [n, dist_x.shape[0]]"
     
-    median_p2p_map = torch.zeros(p2p_maps.shape[1], dtype=torch.int64)
+    medoid_p2p_map = torch.zeros(p2p_maps.shape[1], dtype=torch.int64)
 
     for i in range(p2p_maps.shape[1]):
     
@@ -40,14 +40,14 @@ def get_median_p2p_map(p2p_maps, dist_x):
         
         geo_dists_points = dist_x[vertex_indices][:, vertex_indices]
 
-        # find the median point,
+        # find the medoid point,
         # the one with the smallest sum of geodesic distances to all other points
-        idx_median = vertex_indices[
+        idx_medoid = vertex_indices[
             torch.argmin(geo_dists_points.sum(axis=1))
         ]
-        median_p2p_map[i] = idx_median
+        medoid_p2p_map[i] = idx_medoid
         
-    return median_p2p_map
+    return medoid_p2p_map
     
     
 def dirichlet_energy(p2p_12, verts_2, L_1):
@@ -63,5 +63,7 @@ def dirichlet_energy(p2p_12, verts_2, L_1):
     
     mapped_verts = verts_2[p2p_12]
     
-    return torch.trace(mapped_verts.transpose(0, 1) @ L_1 @ mapped_verts)
+    dirichlet_energy = torch.trace(mapped_verts.transpose(0, 1) @ L_1 @ mapped_verts)
+    
+    return dirichlet_energy
     

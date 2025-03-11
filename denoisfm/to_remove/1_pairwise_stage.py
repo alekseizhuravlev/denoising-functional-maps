@@ -1,18 +1,16 @@
-import torch
-import numpy as np
-import os
-import yaml
 import argparse
+import os
 import random
 
-import utils.fmap_util as fmap_util
-import utils.geodist_util as geodist_util
-import utils.shape_util as shape_util
-
+import DenoisingFunctionalMaps.denoisfm.map_selection as map_selection
+import denoisfm.utils.fmap_util as fmap_util
+import denoisfm.utils.geodist_util as geodist_util
+import denoisfm.utils.preprocessing_util as preprocessing_util
+import denoisfm.utils.shape_util as shape_util
+import numpy as np
+import torch
 import trimesh
-import utils.preprocessing_util as preprocessing_util
-
-import map_selection.dirichlet_median as dirichlet_median
+import yaml
 
 
 def template_map_to_pairwise_map(
@@ -96,7 +94,7 @@ def pairwise_stage(
     # Median map selection
     ###############################################
     
-    p2p_median = dirichlet_median.select_p2p_map(
+    p2p_median = map_selection.select_p2p_map(
         p2p_pair_list,
         test_shape_1['verts'],
         test_shape_2['L'], 

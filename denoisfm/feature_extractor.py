@@ -1,10 +1,16 @@
-# The implementation of DiffusionNet is adapted from official implementation: https://github.com/nmwsharp/diffusion-net
+# The implementation of DiffusionNet is adapted from official implementation:
+# https://github.com/nmwsharp/diffusion-net
 
 import torch
 import torch.nn as nn
-
-from utils.geometry_util import get_all_operators, to_basis, from_basis, compute_hks_autoscale, compute_wks_autoscale, data_augmentation
-# from utils.registry import NETWORK_REGISTRY
+from .utils.geometry_util import (
+    compute_hks_autoscale,
+    compute_wks_autoscale,
+    data_augmentation,
+    from_basis,
+    get_all_operators,
+    to_basis,
+)
 
 
 class LearnedTimeDiffusion(nn.Module):
@@ -247,7 +253,6 @@ class DiffusionNetBlock(nn.Module):
         return feat_out
 
 
-# @NETWORK_REGISTRY.register()
 class DiffusionNet(nn.Module):
     """
     DiffusionNet: stacked of DiffusionBlock

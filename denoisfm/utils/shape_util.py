@@ -39,7 +39,7 @@ def compute_geodesic_distmat(verts, faces):
     # compute geodesic matrix
     geodesic_x = shortest_path(distance_adj, directed=False)
     if np.any(np.isinf(geodesic_x)):
-        print('Inf number in geodesic distance. Increase NN.')
+        raise RuntimeError('Inf number in geodesic distance. Increase NN.')
     return geodesic_x
 
 
