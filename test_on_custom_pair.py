@@ -84,7 +84,7 @@ def run(args):
         "data/template/template.off", process=False, validate=False
     )
     shape_T = preprocessing_util.preprocessing_pipeline(
-        shape_T.vertices, shape_T.faces, num_evecs=200
+        shape_T.vertices, shape_T.faces, num_evecs=200, compute_distmat=False
     )
     logging.info("Template shape loaded")
 
@@ -96,10 +96,10 @@ def run(args):
     shape_2 = trimesh.load(args.shape_2, process=False, validate=False)
 
     shape_1 = preprocessing_util.preprocessing_pipeline(
-        shape_1.vertices, shape_1.faces, num_evecs=200
+        shape_1.vertices, shape_1.faces, num_evecs=200, compute_distmat=True
     )
     shape_2 = preprocessing_util.preprocessing_pipeline(
-        shape_2.vertices, shape_2.faces, num_evecs=200
+        shape_2.vertices, shape_2.faces, num_evecs=200, compute_distmat=False
     ) 
     logging.info("Shapes 1 and 2 loaded")
 
@@ -107,7 +107,7 @@ def run(args):
     # Template stage
     ##########################################
 
-    Pi_T1_list = template_stage(
+    Pi_T1 = template_stage(
         shape_1,
         shape_T,
         ddpm,
@@ -117,7 +117,7 @@ def run(args):
     )
     logging.info("Template stage for shape 1 finished")
     
-    Pi_T2_list = template_stage(
+    Pi_T2 = template_stage(
         shape_2,
         shape_T,
         ddpm,
@@ -131,15 +131,15 @@ def run(args):
     name_1 = os.path.splitext(os.path.basename(args.shape_1))[0]
     name_2 = os.path.splitext(os.path.basename(args.shape_2))[0]
     
-    torch.save(Pi_T1_list, f"results/{name_1}_template.pt")
-    torch.save(Pi_T2_list, f"results/{name_2}_template.pt")
+    torch.save(Pi_T1, f"results/{name_1}_template.pt")
+    torch.save(Pi_T2, f"results/{name_2}_template.pt")
 
     ##########################################
     # Pairwise stage
     ##########################################
 
     Pi_21 = pairwise_stage(
-        shape_1, shape_2, Pi_T1_list, Pi_T2_list, config
+        shape_1, shape_2, Pi_T1, Pi_T2, config
     )
     logging.info("Pairwise stage finished")
 

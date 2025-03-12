@@ -903,60 +903,15 @@ def get_random_rotation(x, y, z):
     return euler_angles_to_rotation_matrix(thetas)
 
 
-# def data_augmentation(verts, rot_x=0, rot_y=90.0, rot_z=0, std=0.01, noise_clip=0.05, scale_min=0.9, scale_max=1.1):
-#     # random rotation
-#     rotation_matrix = get_random_rotation(rot_x, rot_y, rot_z).repeat(verts.shape[0], 1, 1).to(verts.device)
-#     verts = torch.bmm(verts, rotation_matrix.transpose(1, 2))
-
-#     # random noise
-#     noise = std * torch.randn(verts.shape).to(verts.device)
-#     noise = noise.clamp(-noise_clip, noise_clip)
-#     verts += noise
-
-#     # random scaling
-#     scales = [scale_min, scale_max]
-#     scale = scales[0] + torch.rand((3,)) * (scales[1] - scales[0])
-#     verts = verts * scale.to(verts.device)
-
-#     return verts
-
-
-
-def data_augmentation(verts, faces=None, rot_x=0, rot_y=90.0, rot_z=0, std=0.01, noise_clip_low=-0.05, noise_clip_high=0.05, along_normal=False, scale_min=0.9, scale_max=1.1):
+def data_augmentation(verts, rot_x=0, rot_y=90.0, rot_z=0, std=0.01, noise_clip=0.05, scale_min=0.9, scale_max=1.1):
     # random rotation
     rotation_matrix = get_random_rotation(rot_x, rot_y, rot_z).repeat(verts.shape[0], 1, 1).to(verts.device)
     verts = torch.bmm(verts, rotation_matrix.transpose(1, 2))
 
     # random noise
-    if along_normal:
-        assert faces is not None, 'faces should be provided for normal based noise'
-        
-        # repeat for each element in batch
-        for i in range(verts.shape[0]):
-            # compute vertex normals
-            vert_normals = vertex_normal(verts[i], faces[i])
-
-            # add noise along normals
-            noise = std * torch.randn(verts[i].shape[0]).to(verts.device)
-            noise = noise.clamp(noise_clip_low, noise_clip_high)
-            noise = noise.unsqueeze(-1)      
-
-            verts[i] += noise * vert_normals
-        
-        # # compute vertex normals
-        # vert_normals = vertex_normal(verts, faces)
-        
-        # # add noise along normals
-        # noise = std * torch.randn(verts.shape[:-1]).to(verts.device)
-        # noise = noise.clamp(-noise_clip, noise_clip)
-        # noise = noise.unsqueeze(-1)      
-
-        # verts += noise * vert_normals   
-             
-    else:
-        noise = std * torch.randn(verts.shape).to(verts.device)
-        noise = noise.clamp(noise_clip_low, noise_clip_high)
-        verts += noise
+    noise = std * torch.randn(verts.shape).to(verts.device)
+    noise = noise.clamp(-noise_clip, noise_clip)
+    verts += noise
 
     # random scaling
     scales = [scale_min, scale_max]
