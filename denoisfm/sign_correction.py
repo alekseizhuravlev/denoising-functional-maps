@@ -17,7 +17,7 @@ def area_normalize(Sigma, A):
     norms = torch.sqrt(torch.sum((Sigma * A[:, None]) * Sigma, dim=0))  # Shape: (n,)
 
     # Avoid division by zero
-    norms = torch.where(norms == 0, torch.tensor(1.0, device=Sigma.device), norms)
+    norms = torch.where(norms < 1e-6, torch.tensor(1.0, device=Sigma.device), norms)
 
     # Normalize each column of Sigma
     Sigma_normalized = Sigma / norms
@@ -30,7 +30,7 @@ def interleave_corrvecs(Sigma, config):
     Address the basis ambiguity by using one correction vector for several adjacent eigenvectors
     
     Example for 96 eigenvectors:
-    config["sign_net"]["evecs_per_correc"] = [
+    config["evecs_per_correc"] = [
         [32, 1],      # evecs  0-31: 1 evec  / corrvec
         [32, 2],      # evecs 32-63: 2 evecs / corrvec
         [32, 4]       # evecs 64-95: 4 evecs / corrvec
@@ -46,18 +46,18 @@ def interleave_corrvecs(Sigma, config):
     Sigma_repeated = []
     
     curr_idx = 0
-    for count, factor in config["sign_net"]["evecs_per_correc"]:
+    for count, factor in config["evecs_per_correc"]:
         Sigma_repeated.append(
             torch.repeat_interleave(
                 Sigma[:, curr_idx:curr_idx+count // factor],
                 factor, dim=-1)
         )
-        curr_idx += count
-           
+        curr_idx += count // factor
+    
     Sigma_repeated = torch.cat(Sigma_repeated, dim=-1)
     
-    assert Sigma_repeated.shape[-1] == config["model_params"]["sample_size"], \
-        f"Shape mismatch of correction vectors: {Sigma_repeated.shape[-1]} != {config['model_params']['sample_size']}"
+    assert Sigma_repeated.shape[-1] == config["sample_size"], \
+        f"Shape mismatch of correction vectors: {Sigma_repeated.shape[-1]} != {config['sample_size']}"
      
     return Sigma_repeated 
 
@@ -83,6 +83,7 @@ def area_weighted_projection(Sigma, Phi, A):
 def learned_sign_correction(
         sign_corr_net,
         shape,
+        Phi,
         config,
     ):
     
@@ -106,7 +107,7 @@ def learned_sign_correction(
     )[0]
     
     # get the eigenbasis and vertex-area matrix
-    Phi = shape["evecs"][:, :config["model_params"]["sample_size"]].to(device)
+    Phi = Phi.to(device)
     A = shape["mass"].to(device)
 
     # normalize the correction vector
@@ -124,6 +125,9 @@ def learned_sign_correction(
  
     return P_diag, Sigma
 
+
+
+# Phi = shape["evecs"][:, :config["model_params"]["sample_size"]].to(device)
 
 # correc_vector = torch.nn.functional.normalize(correc_vector, p=2, dim=0)
 

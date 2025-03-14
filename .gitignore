@@ -5,3 +5,11 @@
 *.off
 *.vts
 *.pyc
+*.npy
+*.npz
+*.log
+*.png
+denoisfm/data_generation/smal_online/*
+!denoisfm/data_generation/smal_online/.gitkeep
+denoisfm/data_generation/smpl_webuser/*
+!denoisfm/data_generation/smpl_webuser/.gitkeep

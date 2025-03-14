@@ -6,8 +6,9 @@ import denoisfm.utils.geometry_util as geometry_util
 import denoisfm.utils.shape_util as shape_util
 import numpy as np
 import torch
-import utils.remesh_util as remesh_util
+import denoisfm.utils.remesh_util as remesh_util
 from tqdm import tqdm
+import os
 
 
 def run(args, config_aug):
@@ -38,8 +39,11 @@ def run(args, config_aug):
     ##########################################
 
     random_idxs = np.random.choice(len(shapes_verts), args.n_shapes, replace=False)
+    
     dir_off = f"{args.output_dir}/off"
     dir_spectral = f"{args.output_dir}/diffusion"
+    os.makedirs(dir_off, exist_ok=True)
+    os.makedirs(dir_spectral, exist_ok=True)
 
     for i in tqdm(range(args.n_shapes), desc="Generating data"):
         
@@ -52,7 +56,6 @@ def run(args, config_aug):
         # rotation and scaling
         verts_aug = geometry_util.data_augmentation(
             verts.unsqueeze(0),
-            faces.unsqueeze(0),
             rot_x=0,
             rot_y=90,  # random rotation around y-axis
             rot_z=0,
@@ -65,14 +68,7 @@ def run(args, config_aug):
         shape_util.write_off(
             f"{dir_off}/{i:04}.off", verts_aug.cpu().numpy(), faces.cpu().numpy()
         )
-
-        print('!!!! remove this?')
-
-        # read the mesh again
-        verts_aug, faces = shape_util.read_shape(f"{dir_off}/{i:04}.off")
-        verts_aug = torch.tensor(verts_aug, dtype=torch.float32)
-        faces = torch.tensor(faces, dtype=torch.int32)
-
+        
         # calculate and cache the laplacian
         geometry_util.get_operators(verts_aug, faces, k=128, cache_dir=dir_spectral)
 
@@ -85,7 +81,7 @@ if __name__ == "__main__":
             "simplify_strength_max": 0.8,
         },
         "anisotropic": {
-            "probability": 0.0,  # probability of applying anisotropic remeshing
+            "probability": 0.35,  # probability of applying anisotropic remeshing
             "fraction_to_simplify_min": 0.2,  # min/max % of faces to SELECT for simplification
             "fraction_to_simplify_max": 0.6,
             "simplify_strength_min": 0.2,  # from the SELECTED faces, min/max % to keep after simplification

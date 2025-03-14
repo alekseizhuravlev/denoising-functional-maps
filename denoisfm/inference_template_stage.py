@@ -25,6 +25,7 @@ def get_signs_and_conditioning(
             P_diag, Sigma = learned_sign_correction(
                 sign_corr_net,
                 shape,
+                Phi,
                 config,
             )
 

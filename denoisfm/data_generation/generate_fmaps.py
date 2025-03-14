@@ -115,18 +115,21 @@ def run(args, config_aug):
         # Obtain the sign-corrected eigenbasis and conditioning
         ##########################################
         
+        # original eigenbasis
+        Phi_i = shape_i["evecs"][:, :config["model_params"]["sample_size"]]
+        
         # get the diagonal elements of the projection matrix and the correction vector
         with torch.no_grad():
             P_diag_i, Sigma_i = learned_sign_correction(
                 sign_corr_net,
                 shape_i,
+                Phi_i,
                 config,
             )
 
         signs_i = torch.sign(P_diag_i)
 
         # correct the eigenvectors
-        Phi_i = shape_i["evecs"][:, :config["model_params"]["sample_size"]]
         Phi_i_corrected = Phi_i * signs_i
 
         # vertex-area matrix
@@ -141,16 +144,20 @@ def run(args, config_aug):
         # the output of feature extractor may be slightly different for the same shape)
         ##########################################
         
+        # original eigenbasis
+        Phi_T = shape_T["evecs"][:, :config["model_params"]["sample_size"]]
+        
         with torch.no_grad():
             P_diag_T, Sigma_T = learned_sign_correction(
                 sign_corr_net,
                 shape_T,
+                Phi_T,
                 config,
             )
             
         signs_T = torch.sign(P_diag_T)
         
-        Phi_T = shape_T["evecs"][:, :config["model_params"]["sample_size"]]
+        
         Phi_T_corrected = Phi_T * signs_T
         
         A_T = shape_T["mass"]

@@ -3,7 +3,7 @@ import pymeshlab
 import torch
 import trimesh
 
-import fmap_util
+from denoisfm.utils import fmap_util
 
 ms = pymeshlab.MeshSet()
 
@@ -11,12 +11,12 @@ ms = pymeshlab.MeshSet()
 def augmentation_pipeline(verts_orig, faces_orig, config):
     
     # randomly choose the remeshing type
-    remesh_type = np.random.choice(['isotropic', 'anisotropic'], p=[1-config["remesh"]["anisotropic"]["probability"], config["remesh"]["anisotropic"]["probability"]])
+    remesh_type = np.random.choice(['isotropic', 'anisotropic'], p=[1-config["anisotropic"]["probability"], config["anisotropic"]["probability"]])
     
     if remesh_type == 'isotropic':
         
         # isotropic remeshing
-        simplify_strength = np.random.uniform(config["remesh"]["isotropic"]["simplify_strength_min"], config["remesh"]["isotropic"]["simplify_strength_max"])
+        simplify_strength = np.random.uniform(config["isotropic"]["simplify_strength_min"], config["isotropic"]["simplify_strength_max"])
         verts, faces = remesh_simplify_iso(
             verts_orig,
             faces_orig,
@@ -25,15 +25,14 @@ def augmentation_pipeline(verts_orig, faces_orig, config):
     else:
         
         # anisotropic remeshing
-        fraction_to_simplify = np.random.uniform(config["remesh"]["anisotropic"]["fraction_to_simplify_min"], config["remesh"]["anisotropic"]["fraction_to_simplify_max"])
-        simplify_strength = np.random.uniform(config["remesh"]["anisotropic"]["simplify_strength_min"], config["remesh"]["anisotropic"]["simplify_strength_max"])
+        fraction_to_simplify = np.random.uniform(config["anisotropic"]["fraction_to_simplify_min"], config["anisotropic"]["fraction_to_simplify_max"])
+        simplify_strength = np.random.uniform(config["anisotropic"]["simplify_strength_min"], config["anisotropic"]["simplify_strength_max"])
         
         verts, faces = remesh_simplify_anis(
             verts_orig,
             faces_orig,
             fraction_to_simplify=fraction_to_simplify,
             simplify_strength=simplify_strength,
-            weighted_by=config["remesh"]["anisotropic"]["weighted_by"]
         )
         
     # correspondence by a nearest neighbor search
@@ -63,7 +62,7 @@ def remesh_simplify_iso(
         ms.current_mesh().vertex_matrix(), dtype=torch.float32
     )
     f_qec = torch.tensor(
-        ms.current_mesh().face_matrix(), dtype=torch.int32
+        ms.current_mesh().face_matrix(), dtype=torch.long
     )
     
     ms.clear()
@@ -139,7 +138,7 @@ def remesh_simplify_anis(
         ms.current_mesh().vertex_matrix(), dtype=torch.float32
     )
     f_qec = torch.tensor(
-        ms.current_mesh().face_matrix(), dtype=torch.int32
+        ms.current_mesh().face_matrix(), dtype=torch.long
     )
     
     ms.clear()
