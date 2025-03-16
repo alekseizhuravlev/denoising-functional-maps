@@ -50,12 +50,6 @@ def run(args):
     np.random.seed(1)
     random.seed(1)
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
     #######################################################
     # Configuration
     #######################################################
@@ -66,6 +60,16 @@ def run(args):
     exp_base_folder = f"checkpoints/ddpm/{exp_name}"
     with open(f"{exp_base_folder}/config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
+        
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(f'{exp_base_folder}/results_{args.dataset_name}.log'),  # Save logs to a file
+            logging.StreamHandler(),  # Print logs to console
+        ],
+    )
 
     #######################################################
     # Model setup
@@ -75,19 +79,22 @@ def run(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     ddpm = conditional_unet.ConditionalUnet(config["model_params"])
     checkpoint_name = config["checkpoint_name"]
-
-    if "accelerate" in config and config["accelerate"]:
-        accelerate.load_checkpoint_in_model(
-            ddpm, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors"
-        )
-    else:
-        ddpm.load_state_dict(
-            torch.load(
-                f"{exp_base_folder}/checkpoints/{checkpoint_name}", weights_only=True
-            )
-        )
-
+    
+    accelerate.load_checkpoint_in_model(
+        ddpm, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors"
+    )
     ddpm.to(device)
+
+    # if "accelerate" in config and config["accelerate"]:
+    #     accelerate.load_checkpoint_in_model(
+    #         ddpm, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors"
+    #     )
+    # else:
+    #     ddpm.load_state_dict(
+    #         torch.load(
+    #             f"{exp_base_folder}/checkpoints/{checkpoint_name}", weights_only=True
+    #         )
+    #     )
 
     # noise scheduler
     noise_scheduler = DDPMScheduler(

@@ -76,7 +76,17 @@ def area_weighted_projection(Sigma, Phi, A):
     """
     # Compute the projection P = Sigma^T A Phi
     P = Sigma.T @ (A[:, None] * Phi)  # Shape: (n, n)
-
+    
+    # A_mat = torch.diag_embed(A)
+    
+    # Sigma_A_norm = torch.nn.functional.normalize(
+    #     Sigma.transpose(0, 1) @ A_mat,
+    #     p=2, dim=1)
+    
+    # Phi_norm = torch.nn.functional.normalize(Phi, p=2, dim=0)
+    
+    # P = Sigma_A_norm @ Phi_norm
+        
     return P
 
 
@@ -109,7 +119,7 @@ def learned_sign_correction(
     # get the eigenbasis and vertex-area matrix
     Phi = Phi.to(device)
     A = shape["mass"].to(device)
-
+    
     # normalize the correction vector
     Sigma = area_normalize(Sigma, A)    
     

@@ -9,6 +9,8 @@
 *.npz
 *.log
 *.png
+*.err
+*.out
 denoisfm/data_generation/smal_online/*
 !denoisfm/data_generation/smal_online/.gitkeep
 denoisfm/data_generation/smpl_webuser/*

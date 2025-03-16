@@ -8,7 +8,7 @@ from denoisfm.utils import fmap_util
 ms = pymeshlab.MeshSet()
 
 
-def augmentation_pipeline(verts_orig, faces_orig, config):
+def remesh_pipeline(verts_orig, faces_orig, config):
     
     # randomly choose the remeshing type
     remesh_type = np.random.choice(['isotropic', 'anisotropic'], p=[1-config["anisotropic"]["probability"], config["anisotropic"]["probability"]])
@@ -20,6 +20,7 @@ def augmentation_pipeline(verts_orig, faces_orig, config):
         verts, faces = remesh_simplify_iso(
             verts_orig,
             faces_orig,
+            remesh=config["isotropic"]["remesh"],
             simplify_strength=simplify_strength,
         )
     else:
@@ -31,6 +32,7 @@ def augmentation_pipeline(verts_orig, faces_orig, config):
         verts, faces = remesh_simplify_anis(
             verts_orig,
             faces_orig,
+            remesh=config["isotropic"]["remesh"],
             fraction_to_simplify=fraction_to_simplify,
             simplify_strength=simplify_strength,
         )
@@ -47,12 +49,14 @@ def augmentation_pipeline(verts_orig, faces_orig, config):
 def remesh_simplify_iso(
     verts,
     faces,
+    remesh=True,
     simplify_strength=0.3,
 ):
     mesh = pymeshlab.Mesh(verts, faces)
     ms.add_mesh(mesh)
 
-    ms.meshing_isotropic_explicit_remeshing()
+    if remesh:
+        ms.meshing_isotropic_explicit_remeshing()
         
     ms.meshing_decimation_quadric_edge_collapse(
         targetperc=simplify_strength,
@@ -73,6 +77,7 @@ def remesh_simplify_iso(
 def remesh_simplify_anis(
     verts,
     faces,
+    remesh=True,
     fraction_to_simplify=0.3,
     simplify_strength=0.3,
     weighted_by='face_count',
@@ -84,7 +89,8 @@ def remesh_simplify_anis(
     ms.add_mesh(mesh)
     
     # isotropic remeshing
-    ms.meshing_isotropic_explicit_remeshing() 
+    if remesh:
+        ms.meshing_isotropic_explicit_remeshing()
         
     # mesh after remeshing   
     v_r = ms.current_mesh().vertex_matrix()

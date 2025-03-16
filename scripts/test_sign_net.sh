@@ -3,9 +3,11 @@ dataset_choices=(
     "FAUST_a" "SCAPE_a"
 )
 checkpoint_names=(
-    "50000.pth" "35000.pth" "25000.pth" "15000.pth"
+    "50000.pth"
+    #  "35000.pth" 
+    # "25000.pth" "15000.pth"
 )
-exp_name=sign_net_32_humans
+exp_name=sign_net_96_124_norm_rm_anis
 
 echo $exp_name
 

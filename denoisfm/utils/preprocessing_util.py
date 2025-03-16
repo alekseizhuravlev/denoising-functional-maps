@@ -10,8 +10,8 @@ from .shape_util import compute_geodesic_distmat
 def preprocessing_pipeline(verts, faces, num_evecs, compute_distmat=False, lb_cache_dir=None):
     shape_dict = {
         "id": torch.tensor(-1),
-        "verts": torch.tensor(verts).float(),
-        "faces": torch.tensor(faces).long(),
+        "verts": verts if isinstance(verts, torch.Tensor) else torch.tensor(verts, dtype=torch.float),
+        "faces": faces if isinstance(faces, torch.Tensor) else torch.tensor(faces, dtype=torch.long),
     }
 
     shape_dict["verts"] = center_mean(shape_dict["verts"])

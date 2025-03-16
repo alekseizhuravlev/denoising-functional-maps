@@ -26,7 +26,7 @@ def get_signs_and_conditioning(
                 sign_corr_net,
                 shape,
                 Phi,
-                config,
+                config["sign_net"],
             )
 
         signs = torch.sign(P_diag)

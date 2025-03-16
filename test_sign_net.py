@@ -60,6 +60,8 @@ def run(args):
 
     # Test dataset
     single_dataset, _ = get_dataset(args.dataset_name, args.base_dir)
+    # load all test shapes into memory
+    single_dataset = [single_dataset[i] for i in range(len(single_dataset))]
     #######################################################
 
     sign_accuracy_list = []
@@ -78,8 +80,8 @@ def run(args):
 
             # evecs with random signs
             Phi_1 = Phi * signs_1
-            Phi_2 = Phi * signs_2
-
+            Phi_2 = Phi * signs_2  
+                        
             # get the diagonal elements of the projection matrix
             P_diag_1, _ = learned_sign_correction(
                 sign_net,
