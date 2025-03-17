@@ -89,7 +89,18 @@ if __name__ == "__main__":
             # compute distance matrix
             dist_mat = compute_geodesic_distmat(verts, faces).astype(np.float32)
             # save results
-            sio.savemat(
-                os.path.join(dist_dir, filename.replace(".off", ".mat")),
-                {"dist": dist_mat},
-            )
+            
+            if "DT4D" in data_root:
+                # e.g. DT4D_r/off/crypto/Punching015.obj -> DT4D_r/dist/crypto/Punching015.mat
+                dist_dir = os.path.join(data_root, "dist", os.path.basename(os.path.dirname(off_file)))
+                os.makedirs(dist_dir, exist_ok=True)    
+                sio.savemat(
+                    os.path.join(dist_dir, os.path.basename(off_file).replace(".off", ".mat")),
+                    {"dist": dist_mat},
+                )
+            else:
+                # e.g. FAUST_r/off/tr_reg_000.off -> FAUST_r/dist/tr_reg_000.mat
+                sio.savemat(
+                    os.path.join(dist_dir, filename.replace(".off", ".mat")),
+                    {"dist": dist_mat},
+                )

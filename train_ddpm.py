@@ -17,9 +17,9 @@ class DatasetDDPM(torch.utils.data.Dataset):
     def __init__(self, base_dir):
         super().__init__()
 
-        self.C_1T = torch.load(f"{base_dir}/C_1T.pt", mmap=True)
-        self.y_T = torch.load(f"{base_dir}/y_T.pt", mmap=True)
-        self.y_1 = torch.load(f"{base_dir}/y_1.pt", mmap=True)
+        self.C_1T = torch.load(f"{base_dir}/C_1T.pt", mmap=True, weights_only=True)
+        self.y_T = torch.load(f"{base_dir}/y_T.pt", mmap=True, weights_only=True)
+        self.y_1 = torch.load(f"{base_dir}/y_1.pt", mmap=True, weights_only=True)
 
         assert self.C_1T.dtype == self.y_T.dtype == self.y_1.dtype == torch.float32
 
@@ -33,47 +33,47 @@ class DatasetDDPM(torch.utils.data.Dataset):
         return C_1T, y_full
 
 
-def train_epoch(
-    model, accelerator, train_dataloader, noise_scheduler, opt, loss_fn, lr_scheduler
-):
-    # Keeping a record of the losses for later viewing
-    losses = []
+# def train_epoch(
+#     model, accelerator, train_dataloader, noise_scheduler, opt, loss_fn, lr_scheduler
+# ):
+#     # Keeping a record of the losses for later viewing
+#     losses = []
 
-    # The training loop
-    for x, y in tqdm(
-        train_dataloader,
-        total=len(train_dataloader),
-        disable=not accelerator.is_local_main_process,
-    ):
-        # sample the noise and the timesteps
-        noise = torch.randn_like(x)
+#     # The training loop
+#     for x, y in tqdm(
+#         train_dataloader,
+#         total=len(train_dataloader),
+#         disable=not accelerator.is_local_main_process,
+#     ):
+#         # sample the noise and the timesteps
+#         noise = torch.randn_like(x)
 
-        timesteps = (
-            torch.randint(0, noise_scheduler.config.num_train_timesteps, (x.shape[0],))
-            .long()
-            .to(accelerator.device)
-        )
+#         timesteps = (
+#             torch.randint(0, noise_scheduler.config.num_train_timesteps, (x.shape[0],))
+#             .long()
+#             .to(accelerator.device)
+#         )
 
-        # Add the noise to the input
-        noisy_x = noise_scheduler.add_noise(x, noise, timesteps)
+#         # Add the noise to the input
+#         noisy_x = noise_scheduler.add_noise(x, noise, timesteps)
 
-        # Get the model prediction
-        pred = model(sample=noisy_x, timestep=timesteps, conditioning=y).sample
+#         # Get the model prediction
+#         pred = model(sample=noisy_x, timestep=timesteps, conditioning=y).sample
 
-        # Calculate the loss
-        loss = loss_fn(pred, noise)  # How close is the output to the noise
+#         # Calculate the loss
+#         loss = loss_fn(pred, noise)  # How close is the output to the noise
 
-        # Backprop and update the params:
-        opt.zero_grad()
-        accelerator.backward(loss)
+#         # Backprop and update the params:
+#         opt.zero_grad()
+#         accelerator.backward(loss)
 
-        opt.step()
-        lr_scheduler.step()
+#         opt.step()
+#         lr_scheduler.step()
 
-        # Store the loss for later
-        losses.append(loss.item())
+#         # Store the loss for later
+#         losses.append(loss.item())
 
-    return model, losses
+#     return model, losses
 
 
 def run(args):
@@ -104,6 +104,11 @@ def run(args):
             "block_out_channels": tuple(map(int, args.block_out_channels.split(","))),
             "down_block_types": ["DownBlock2D", "AttnDownBlock2D", "AttnDownBlock2D"],
             "up_block_types": ["AttnUpBlock2D", "AttnUpBlock2D", "UpBlock2D"],
+        },
+        "inference": {
+            "num_samples_total": 128,
+            "num_samples_selection": 16,
+            "zoomout_step": 1,
         },
     }
 
@@ -167,31 +172,82 @@ def run(args):
     accelerator.init_trackers(config["exp_name"])
 
     ### Training
-    train_iterator = tqdm(
-        range(config["n_epochs"]), disable=not accelerator.is_local_main_process
-    )
-    for epoch in train_iterator:
-        # training step
-        model, losses = train_epoch(
-            model,
-            accelerator,
+    # train_iterator = tqdm(
+    #     range(config["n_epochs"]), disable=not accelerator.is_local_main_process
+    # )
+    curr_iter = 0
+    for epoch in range(config["n_epochs"]):
+        
+        for x, y in tqdm(
             train_dataloader,
-            noise_scheduler,
-            opt,
-            loss_fn,
-            lr_scheduler,
-        )
+            total=len(train_dataloader),
+            disable=not accelerator.is_local_main_process,
+            mininterval=5,
+        ):
+            # sample the noise and the timesteps
+            noise = torch.randn_like(x)
 
-        # log the last loss per epoch
-        accelerator.log({"loss/train": losses[-1]}, step=epoch * len(train_dataloader))
-        train_iterator.set_description(
-            f"Epoch {epoch}, loss: {losses[-1]:.4f}"
-        )
+            timesteps = (
+                torch.randint(0, noise_scheduler.config.num_train_timesteps, (x.shape[0],))
+                .long()
+                .to(accelerator.device)
+            )
 
+            # Add the noise to the input
+            noisy_x = noise_scheduler.add_noise(x, noise, timesteps)
+
+            # Get the model prediction
+            pred = model(sample=noisy_x, timestep=timesteps, conditioning=y).sample
+
+            # Calculate the loss
+            loss = loss_fn(pred, noise)  # How close is the output to the noise
+
+            # Backprop and update the params:
+            opt.zero_grad()
+            accelerator.backward(loss)
+
+            opt.step()
+            lr_scheduler.step()
+            
+            # log the loss every 10% of the dataset
+            if curr_iter % (len(train_dataloader) // 10) == 0:
+                accelerator.log({"loss/train": loss.item()}, step=curr_iter)
+            
+            curr_iter += 1
+            
+        if accelerator.is_local_main_process:
+            logging.info(f"Epoch {epoch}, loss: {loss.item():.4f}")
+            
         # save the model checkpoint
         if epoch > 0 and epoch % config["checkpoint_every"] == 0:
             accelerator.wait_for_everyone()
             accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")
+            
+
+            # Store the loss for later
+            # losses.append(loss.item())
+        
+        # training step
+        # model, losses = train_epoch(
+        #     model,
+        #     accelerator,
+        #     train_dataloader,
+        #     noise_scheduler,
+        #     opt,
+        #     loss_fn,
+        #     lr_scheduler,
+        # )
+
+        # # log the last loss per epoch
+        # accelerator.log({"loss/train": losses[-1]}, step=epoch * len(train_dataloader))
+        # train_iterator.set_description(
+        #     f"Epoch {epoch}, loss: {losses[-1]:.4f}"
+        # )
+
+        # # save the model checkpoint
+        # if epoch > 0 and epoch % config["checkpoint_every"] == 0:
+        #     accelerator.wait_for_everyone()
+        #     accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")
 
     accelerator.wait_for_everyone()
     accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")

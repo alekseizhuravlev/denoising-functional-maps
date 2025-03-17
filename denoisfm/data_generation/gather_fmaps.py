@@ -114,13 +114,13 @@ def gather_files(data_dir, prefix, remove_after):
         # data_i = torch.tensor(data_i)
         
         # sleep for 1-2 seconds
-        time.sleep(np.random.uniform(1, 2))
+        # time.sleep(np.random.uniform(1, 2))
         
         # read the file as torch tensor
         data_i = torch.load(f'{data_dir}/{file["file"]}')
         assert not torch.isnan(data_i).any(), f'file: {file["file"]} has nan'
         
-        raise RuntimeError('this should be a stack')
+        # raise RuntimeError('this should be a stack')
         data_pt = torch.cat((data_pt, data_i), dim=0)
         
         time_end = time.time()
@@ -145,19 +145,22 @@ if __name__ == '__main__':
     # dataset_name = 'SURREAL_96_1-2-2ev_template_remeshed_augShapes'
     
     dataset_name_list = [
-        # 'SURREAL_128_1-1-2-2ev_template_remeshed_augShapes_bbox',
-        # 'SURREAL_128_1-2-2-2ev_template_remeshed_augShapes_bbox',
+        # 'SURREAL_sign_net_32_norm_rm',
+        # 'SURREAL_sign_net_64_norm_rm',
+        'SURREAL_sign_net_96_122_norm_rm',
+        'SURREAL_sign_net_96_124_norm_rm',
         
         
-        'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_32k',
-        'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_64k',
+        
+        # 'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_32k',
+        # 'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_64k',
     ]
     
     prefix_list = [
         # 'evals_first', 'evals_second',
         # 'C_gt_xy',
-        'C_gt_yx', 
-        'evecs_cond_first', 'evecs_cond_second'
+        'C_1T', 
+        'y_1', 'y_T'
         ]
     
     for dataset_name in dataset_name_list:
@@ -165,9 +168,10 @@ if __name__ == '__main__':
         print('Gathering', dataset_name)
         time.sleep(2)
         
-        data_dir = f'/lustre/mlnvme/data/s94zalek_hpc-shape_matching/SURREAL/train/{dataset_name}/train'
+        # data_dir = f'/lustre/mlnvme/data/s94zalek_hpc-shape_matching/SURREAL/train/{dataset_name}/train'
+        data_dir = f'/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/{dataset_name}'
         
-        # verify_integrity(data_dir, prefix_list)
+        verify_integrity(data_dir, prefix_list)
         
         # check_for_nan(data_dir, prefix_list)
         

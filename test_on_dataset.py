@@ -57,8 +57,8 @@ def run(args):
     exp_name = args.exp_name
 
     ### config
-    exp_base_folder = f"checkpoints/ddpm/{exp_name}"
-    with open(f"{exp_base_folder}/config.yaml", "r") as f:
+    exp_base_dir = f"checkpoints/ddpm/{exp_name}"
+    with open(f"{exp_base_dir}/config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         
     logging.basicConfig(
@@ -66,7 +66,7 @@ def run(args):
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
-            logging.FileHandler(f'{exp_base_folder}/results_{args.dataset_name}.log'),  # Save logs to a file
+            logging.FileHandler(f'{exp_base_dir}/results_{args.dataset_name}.log'),  # Save logs to a file
             logging.StreamHandler(),  # Print logs to console
         ],
     )
@@ -77,22 +77,22 @@ def run(args):
 
     # DDPM model
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    ddpm = conditional_unet.ConditionalUnet(config["model_params"])
-    checkpoint_name = config["checkpoint_name"]
+    ddpm = conditional_unet.ConditionalUnet(config["ddpm_params"])
+    checkpoint_name = args.checkpoint_name
     
     accelerate.load_checkpoint_in_model(
-        ddpm, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors"
+        ddpm, f"{exp_base_dir}/checkpoints/{checkpoint_name}/model.safetensors"
     )
     ddpm.to(device)
 
     # if "accelerate" in config and config["accelerate"]:
     #     accelerate.load_checkpoint_in_model(
-    #         ddpm, f"{exp_base_folder}/checkpoints/{checkpoint_name}/model.safetensors"
+    #         ddpm, f"{exp_base_dir}/checkpoints/{checkpoint_name}/model.safetensors"
     #     )
     # else:
     #     ddpm.load_state_dict(
     #         torch.load(
-    #             f"{exp_base_folder}/checkpoints/{checkpoint_name}", weights_only=True
+    #             f"{exp_base_dir}/checkpoints/{checkpoint_name}", weights_only=True
     #         )
     #     )
 
@@ -102,11 +102,11 @@ def run(args):
     )
 
     # sign correction network
-    sign_corr_net = feature_extractor.DiffusionNet(**config["sign_net"]["net_params"])
+    sign_corr_net = feature_extractor.DiffusionNet(**config["sign_net"]["diffusionnet_params"])
 
     sign_corr_net.load_state_dict(
         torch.load(
-            f"checkpoints/sign_net/{config['sign_net']['net_name']}/{config['sign_net']['n_iter']}.pth",
+            f"checkpoints/sign_net/{config['sign_net']['name']}/{config['sign_net']['n_iter']}.pth",
             weights_only=True,
         )
     )
@@ -162,7 +162,7 @@ def run(args):
     ##########################################
     
     geo_err_list = []
-    os.makedirs(f"results/{args.dataset_name}", exist_ok=True)
+    os.makedirs(f"results/{exp_name}/{args.dataset_name}", exist_ok=True)
     
     for i in tqdm(range(len(pair_dataset)), desc="Pairwise stage"):
         pair_i = pair_dataset[i]
@@ -177,7 +177,7 @@ def run(args):
         
         # save the pairwise map
         name_1, name_2 = shape_1["name"], shape_2["name"]
-        output_file = f"results/{args.dataset_name}/{name_1}_{name_2}.pt"
+        output_file = f"results/{exp_name}/{args.dataset_name}/{name_1}_{name_2}.pt"
         torch.save(Pi_21, output_file)
         
         # calculate the geodesic error
@@ -209,6 +209,7 @@ if __name__ == "__main__":
     ]
 
     parser.add_argument("--exp_name", type=str, required=True)
+    parser.add_argument("--checkpoint_name", type=str, required=True)
     parser.add_argument("--dataset_name", type=str, choices=dataset_choices, required=True)
     parser.add_argument(
         "--base_dir",

@@ -73,7 +73,7 @@ def pairwise_stage(
         Pi_21_k = template_map_to_pairwise_map(
             Pi_T1_list[k], Pi_T2_list[k],
             Phi_1, Phi_2, A_2,
-            sample_size=config["model_params"]["sample_size"],
+            sample_size=config["ddpm_params"]["sample_size"],
             zoomout_step=config["inference"]["zoomout_step"],
             )
         Pi_21_list.append(Pi_21_k)

@@ -13,7 +13,7 @@ def get_signs_and_conditioning(
 ):
     device = next(sign_corr_net.parameters()).device
 
-    Phi = shape["evecs"][:, :config["model_params"]["sample_size"]].to(device)
+    Phi = shape["evecs"][:, :config["ddpm_params"]["sample_size"]].to(device)
     A = shape["mass"].to(device)
 
     signs_list = []
@@ -61,7 +61,7 @@ def template_stage(
 ):
     device = next(sign_corr_net.parameters()).device
 
-    sample_size = config["model_params"]["sample_size"]
+    sample_size = config["ddpm_params"]["sample_size"]
 
     # get the eigenbasis of the template and the test shape
     Phi_T = shape_T["evecs"][:, :sample_size].to(device)
