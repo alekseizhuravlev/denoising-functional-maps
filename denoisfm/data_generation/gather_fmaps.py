@@ -147,10 +147,11 @@ if __name__ == '__main__':
     dataset_name_list = [
         # 'SURREAL_sign_net_32_norm_rm',
         # 'SURREAL_sign_net_64_norm_rm',
-        'SURREAL_sign_net_96_122_norm_rm',
-        'SURREAL_sign_net_96_124_norm_rm',
+        # 'SURREAL_sign_net_96_122_norm_rm',
+        # 'SURREAL_sign_net_96_124_norm_rm',
         
-        
+        'SMAL_sign_net_64_smal',
+        'SMAL_sign_net_64_smal_old_data',
         
         # 'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_32k',
         # 'SMAL_nocat_64_SMAL_isoRemesh_0.2_0.8_nocat_1-2ev_64k',

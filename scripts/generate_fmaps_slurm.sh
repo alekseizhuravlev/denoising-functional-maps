@@ -22,15 +22,14 @@ export PYTHONPATH="${PYTHONPATH}:/home/s94zalek_hpc/DenoisingFunctionalMaps"
 # basic parameters
 ###########################################
 
-dataset_name=SURREAL_sign_net_96_124_norm_rm
+dataset_name=SMAL_sign_net_64_smal_old_data
 
-sign_net_name=sign_net_96_124_norm_rm
+sign_net_name=sign_net_64_smal_old_data
 
-# input_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL
-input_dir=/home/s94zalek_hpc/DenoisingFunctionalMaps/data/SURREAL
+input_dir=/home/s94zalek_hpc/DenoisingFunctionalMaps/data/SMAL
 output_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train
 
-template_type=human
+template_type=animal
 
 vis_freq=1000
 
@@ -39,7 +38,7 @@ vis_freq=1000
 ###########################################
 
 # calculate the start and end indices for the current job
-dataset_size=230000
+dataset_size=64000
 
 # Ensure at least one worker
 worker_count=$((SLURM_ARRAY_TASK_COUNT > 1 ? SLURM_ARRAY_TASK_COUNT : 1))

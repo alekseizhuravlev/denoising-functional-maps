@@ -56,14 +56,14 @@ def random_signs(n):
 
 if __name__ == "__main__":
     config = {
-        "name": "sign_net_96_124_norm_rm_anis",
-        "data_dir": "/home/s94zalek_hpc/DenoisingFunctionalMaps/data/sign_training_humans_norm_rm_anis",
+        "name": "sign_net_64_smal_old_data",
+        "data_dir": "/home/s94zalek_hpc/shape_matching/data_sign_training/train/SMAL_isoRemesh_0.2_0.8_nocat",
         "output_dir": "/home/s94zalek_hpc/DenoisingFunctionalMaps/checkpoints/sign_net",
-        "sample_size": 96,
+        "sample_size": 64,
         # "evecs_per_correc": [[32, 1]],
-        # "evecs_per_correc": [[32, 1], [32, 2]],
+        "evecs_per_correc": [[32, 1], [32, 2]],
         # "evecs_per_correc": [[32, 1], [32, 2], [32, 2]],
-        "evecs_per_correc": [[32, 1], [32, 2], [32, 4]],
+        # "evecs_per_correc": [[32, 1], [32, 2], [32, 4]],
         "n_iter": 50000,
         "diffusionnet_params": {
             "in_channels": 128,  # 'out_channels' will be calculated automatically

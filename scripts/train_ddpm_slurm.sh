@@ -19,8 +19,8 @@ module load libGLU Xvfb
 export PYTHONPATH=${PYTHONPATH}:/home/s94zalek_hpc/DenoisingFunctionalMaps
 
 
-exp_name='ddpm_64_SURREAL_sign_net_64_norm_rm'
-dataset_name='SURREAL_sign_net_64_norm_rm'
+exp_name='ddpm_64_SMAL_sign_net_64_smal_old_data'
+dataset_name='SMAL_sign_net_64_smal_old_data'
 sample_size=64
 block_out_channels='64,128,128'
 # block_out_channels='32,64,64'

@@ -118,15 +118,11 @@ def run(args):
     # Template shape
     ##########################################
 
-    if args.dataset_name == "SMAL_iso":
-        shape_T = trimesh.load("data/template_animal/template.off", process=False, validate=False)
-    else:
-        shape_T = trimesh.load("data/template_human/template.off", process=False, validate=False)
-
+    shape_T = trimesh.load(f"data/template/{config['template_type']}/template.off", process=False, validate=False)
     shape_T = preprocessing_util.preprocessing_pipeline(
         shape_T.vertices, shape_T.faces, num_evecs=200, compute_distmat=False
     )
-    logging.info("Template shape loaded")
+    logging.info(f"Template shape loaded, type: {config['template_type']}")
 
     ##########################################
     # Test dataset

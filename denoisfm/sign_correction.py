@@ -1,28 +1,5 @@
 import torch
-
-
-def area_normalize(Sigma, A):
-    """
-    Normalize the feature matrix Sigma with respect to the vertex-area matrix A using PyTorch.
-
-    Args:
-        Sigma (torch.Tensor): Feature matrix of shape (v, n), where v is the number of vertices and n is the number of features.
-        A (torch.Tensor): vertex-areas of shape (v).
-
-    Returns:
-        torch.Tensor: The A-normalized feature matrix.
-    """
-    
-    # Compute the A-norm for each column of Sigma
-    norms = torch.sqrt(torch.sum((Sigma * A[:, None]) * Sigma, dim=0))  # Shape: (n,)
-
-    # Avoid division by zero
-    norms = torch.where(norms < 1e-6, torch.tensor(1.0, device=Sigma.device), norms)
-
-    # Normalize each column of Sigma
-    Sigma_normalized = Sigma / norms
-
-    return Sigma_normalized
+from torch.nn import functional as F
 
 
 def interleave_corrvecs(Sigma, config):
@@ -67,25 +44,23 @@ def area_weighted_projection(Sigma, Phi, A):
     Project the feature matrix Sigma onto the eigenvectors Phi using Sigma^T A Phi.
 
     Args:
-        Sigma (torch.Tensor): A-normalized feature matrix of shape (v, n).
-        Phi (torch.Tensor): Eigenvector matrix of shape (v, n), assumed to be A-orthonormal.
+        Sigma (torch.Tensor): Feature matrix of shape (v, n).
+        Phi (torch.Tensor): Eigenvector matrix of shape (v, n).
         A (torch.Tensor): vertex-areas of shape (v).
 
     Returns:
         torch.Tensor: Projection matrix of shape (n, n).
     """
-    # Compute the projection P = Sigma^T A Phi
-    P = Sigma.T @ (A[:, None] * Phi)  # Shape: (n, n)
+
+    # compute Sigma^T A
+    Sigma_A = Sigma.transpose(0, 1) @ torch.diag_embed(A)
     
-    # A_mat = torch.diag_embed(A)
+    # ensure the projection values are in the range [-1, 1]
+    Sigma_A_norm = F.normalize(Sigma_A, p=2, dim=1)
+    Phi_norm = F.normalize(Phi, p=2, dim=0)
     
-    # Sigma_A_norm = torch.nn.functional.normalize(
-    #     Sigma.transpose(0, 1) @ A_mat,
-    #     p=2, dim=1)
-    
-    # Phi_norm = torch.nn.functional.normalize(Phi, p=2, dim=0)
-    
-    # P = Sigma_A_norm @ Phi_norm
+    # compute Sigma^T A Phi
+    P = Sigma_A_norm @ Phi_norm
         
     return P
 
@@ -119,10 +94,7 @@ def learned_sign_correction(
     # get the eigenbasis and vertex-area matrix
     Phi = Phi.to(device)
     A = shape["mass"].to(device)
-    
-    # normalize the correction vector
-    Sigma = area_normalize(Sigma, A)    
-    
+      
     # address basis ambiguity:
     # use one correction vector for several adjacent evecs
     Sigma = interleave_corrvecs(Sigma, config)   
@@ -135,20 +107,3 @@ def learned_sign_correction(
  
     return P_diag, Sigma
 
-
-
-# Phi = shape["evecs"][:, :config["model_params"]["sample_size"]].to(device)
-
-# correc_vector = torch.nn.functional.normalize(correc_vector, p=2, dim=0)
-
-# normalize the evecs
-# evecs_norm = torch.nn.functional.normalize(
-#     shape["evecs"], p=2, dim=0
-#     ).to(device)
-# mass_mat = torch.diag_embed(shape["mass"]).to(device)
-
-
-# projection = correction_vector @ mass @ evecs (normalized)  
-# projection_mat = torch.nn.functional.normalize(
-#     correc_vector_repeated.transpose(0, 1) @ mass_mat,
-#     p=2, dim=-1) @ evecs_norm

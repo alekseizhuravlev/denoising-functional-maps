@@ -85,10 +85,10 @@ def pairwise_stage(
     ###############################################
 
     Pi_21_medoid = map_selection.select_p2p_map(
-        Pi_21_list,
-        shape_1['verts'],
-        shape_2['L'], 
-        shape_1['dist'],
+        Pi_21_list.to(device),
+        shape_1['verts'].to(device),
+        shape_2['L'].to(device), 
+        shape_1['dist'].to(device),
         num_samples_selection=config["inference"]["num_samples_selection"]
         ).cpu()
 

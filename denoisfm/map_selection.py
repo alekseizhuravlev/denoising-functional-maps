@@ -9,7 +9,7 @@ def select_p2p_map(p2p_est_zo_sampled, verts_first, L_second, dist_first, num_sa
         dirichlet_energy_list.append(
             dirichlet_energy(p2p_est_zo_sampled[n], verts_first, L_second).item(),
             )
-    dirichlet_energy_list = torch.tensor(dirichlet_energy_list)
+    dirichlet_energy_list = torch.tensor(dirichlet_energy_list, device=p2p_est_zo_sampled.device)
 
     # sort by dirichlet energy, get the arguments
     _, sorted_idx_dirichlet = torch.sort(dirichlet_energy_list)

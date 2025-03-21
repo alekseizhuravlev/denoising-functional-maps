@@ -78,10 +78,7 @@ def run(args, config_aug):
     # Template shape
     ##########################################
 
-    if args.template_type == "animal":
-        template_path = "data/template_animal"
-    else:
-        template_path = "data/template_human"
+    template_path = f"data/template/{args.template_type}"
 
     shape_T = trimesh.load(
         f"{template_path}/template.off", process=False, validate=False
@@ -102,7 +99,7 @@ def run(args, config_aug):
     shapes_verts = torch.load(f"{args.input_dir}/verts.pt", mmap=True)
 
     # load the faces (same for all shapes)
-    shapes_faces = torch.load(f"{args.input_dir}/faces.pt", mmap=True)
+    shapes_faces = torch.load(f"{args.input_dir}/faces.pt")
 
     logging.info("Source shapes loaded")
 
