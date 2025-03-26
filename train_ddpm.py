@@ -33,49 +33,6 @@ class DatasetDDPM(torch.utils.data.Dataset):
         return C_1T, y_full
 
 
-# def train_epoch(
-#     model, accelerator, train_dataloader, noise_scheduler, opt, loss_fn, lr_scheduler
-# ):
-#     # Keeping a record of the losses for later viewing
-#     losses = []
-
-#     # The training loop
-#     for x, y in tqdm(
-#         train_dataloader,
-#         total=len(train_dataloader),
-#         disable=not accelerator.is_local_main_process,
-#     ):
-#         # sample the noise and the timesteps
-#         noise = torch.randn_like(x)
-
-#         timesteps = (
-#             torch.randint(0, noise_scheduler.config.num_train_timesteps, (x.shape[0],))
-#             .long()
-#             .to(accelerator.device)
-#         )
-
-#         # Add the noise to the input
-#         noisy_x = noise_scheduler.add_noise(x, noise, timesteps)
-
-#         # Get the model prediction
-#         pred = model(sample=noisy_x, timestep=timesteps, conditioning=y).sample
-
-#         # Calculate the loss
-#         loss = loss_fn(pred, noise)  # How close is the output to the noise
-
-#         # Backprop and update the params:
-#         opt.zero_grad()
-#         accelerator.backward(loss)
-
-#         opt.step()
-#         lr_scheduler.step()
-
-#         # Store the loss for later
-#         losses.append(loss.item())
-
-#     return model, losses
-
-
 def run(args):
     
     torch.manual_seed(1)
@@ -150,12 +107,7 @@ def run(args):
         num_training_steps=config["n_epochs"] * len(train_dataloader),
     )
 
-    ####################################################
-    # !!!!!! removing this will cause
-    # UserWarning: Grad strides do not match bucket view strides.
-    # grad.sizes() = [128, 256, 1, 1], strides() = [256, 1, 256, 256]
-    # bucket_view.sizes() = [128, 256, 1, 1], strides() = [256, 1, 1, 1]
-
+    # avoid bucket view strides error
     model.to(memory_format=torch.channels_last)
 
     ####################################################
@@ -172,9 +124,6 @@ def run(args):
     accelerator.init_trackers(config["exp_name"])
 
     ### Training
-    # train_iterator = tqdm(
-    #     range(config["n_epochs"]), disable=not accelerator.is_local_main_process
-    # )
     curr_iter = 0
     for epoch in range(config["n_epochs"]):
         
@@ -222,32 +171,6 @@ def run(args):
         if epoch > 0 and epoch % config["checkpoint_every"] == 0:
             accelerator.wait_for_everyone()
             accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")
-            
-
-            # Store the loss for later
-            # losses.append(loss.item())
-        
-        # training step
-        # model, losses = train_epoch(
-        #     model,
-        #     accelerator,
-        #     train_dataloader,
-        #     noise_scheduler,
-        #     opt,
-        #     loss_fn,
-        #     lr_scheduler,
-        # )
-
-        # # log the last loss per epoch
-        # accelerator.log({"loss/train": losses[-1]}, step=epoch * len(train_dataloader))
-        # train_iterator.set_description(
-        #     f"Epoch {epoch}, loss: {losses[-1]:.4f}"
-        # )
-
-        # # save the model checkpoint
-        # if epoch > 0 and epoch % config["checkpoint_every"] == 0:
-        #     accelerator.wait_for_everyone()
-        #     accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")
 
     accelerator.wait_for_everyone()
     accelerator.save_model(model, f"{exp_dir}/checkpoints/epoch_{epoch}")

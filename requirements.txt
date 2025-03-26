@@ -5,8 +5,10 @@ matplotlib
 networkx
 numpy
 open3d
+opencv_python
 pandas
 potpourri3d
+pymeshlab
 PyYAML
 robust_laplacian
 scikit_learn

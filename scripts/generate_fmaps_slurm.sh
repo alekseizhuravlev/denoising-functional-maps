@@ -22,12 +22,12 @@ export PYTHONPATH="${PYTHONPATH}:/home/s94zalek_hpc/DenoisingFunctionalMaps"
 # basic parameters
 ###########################################
 
-dataset_name=SMAL_sign_net_64_smal_old_data
+dataset_name=SMAL_sign_net_64_smal_new_proj
 
-sign_net_name=sign_net_64_smal_old_data
+sign_net_name=sign_net_64_smal_new_proj
 
-input_dir=/home/s94zalek_hpc/DenoisingFunctionalMaps/data/SMAL
-output_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train
+input_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/base/SMAL
+output_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/ddpm
 
 template_type=animal
 
@@ -65,18 +65,6 @@ echo "Worker $curr_worker: Processing indices $idx_start to $idx_end, chunk size
 sleep_time=$((RANDOM % 10))
 echo "Sleeping for ${sleep_time} seconds" >&2
 sleep ${sleep_time}
-
-
-# srun python denoisfm/data_generation/generate_fmaps.py --sign_net_name sign_net_64_norm_rm --input_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL --idx_start 0 --idx_end 100 --output_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL_sign_net_64_norm_rm --vis_freq 1 --template_type human
-# rewrite line above but break it into multiple lines
-# srun python denoisfm/data_generation/generate_fmaps.py \
-#     --sign_net_name sign_net_64_norm_rm \
-#     --input_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL \
-#     --template_type human
-#     --idx_start 0 \
-#     --idx_end 100 \
-#     --output_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL_sign_net_64_norm_rm \
-#     --vis_freq 1 
 
 srun python denoisfm/data_generation/generate_fmaps.py \
     --dataset_name $dataset_name \

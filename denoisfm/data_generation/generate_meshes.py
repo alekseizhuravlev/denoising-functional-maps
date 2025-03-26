@@ -10,6 +10,7 @@ import torch
 import denoisfm.utils.remesh_util as remesh_util
 from tqdm import tqdm
 import os
+import yaml
 
 
 def run(args, config_aug):
@@ -22,6 +23,12 @@ def run(args, config_aug):
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+    
+    exp_dir = f"{args.output_dir}/{args.dataset_name}"
+    os.makedirs(exp_dir, exist_ok=True)
+    
+    with open(f"{exp_dir}/config.yaml", "w") as f:
+        yaml.dump(config_aug, f, sort_keys=False)
 
     ##########################################
     # Load shapes
@@ -41,8 +48,8 @@ def run(args, config_aug):
 
     random_idxs = np.random.choice(len(shapes_verts), args.n_shapes, replace=False)
     
-    dir_off = f"{args.output_dir}/{args.dataset_name}/off"
-    dir_spectral = f"{args.output_dir}/{args.dataset_name}/diffusion"
+    dir_off = f"{exp_dir}/off"
+    dir_spectral = f"{exp_dir}/diffusion"
     os.makedirs(dir_off, exist_ok=True)
     os.makedirs(dir_spectral, exist_ok=True)
 
@@ -130,5 +137,5 @@ if __name__ == "__main__":
 
     run(args, config_aug)
     
-    # python denoisfm/data_generation/generate_meshes.py --dataset_name sign_training_humans_norm_rm --input_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/SURREAL --n_shapes 1000 --output_dir /home/s94zalek_hpc/DenoisingFunctionalMaps/data
+    # python denoisfm/data_generation/generate_meshes.py --dataset_name sign_training_animals --input_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/base/SMAL_128000 --n_shapes 1000 --output_dir /home/s94zalek_hpc/DenoisingFunctionalMaps/data/sign_net
     

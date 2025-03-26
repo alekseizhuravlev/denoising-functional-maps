@@ -1,10 +1,12 @@
 import argparse
+import logging
 import os
 import random
 
 import accelerate
 import denoisfm.conditional_unet as conditional_unet
 import denoisfm.feature_extractor as feature_extractor
+import denoisfm.shape_dataset as shape_dataset
 import denoisfm.utils.preprocessing_util as preprocessing_util
 import numpy as np
 import torch
@@ -14,22 +16,50 @@ from denoisfm.inference_pairwise_stage import pairwise_stage
 from denoisfm.inference_template_stage import template_stage
 from denoisfm.utils.geodist_util import calculate_geodesic_error
 from diffusers import DDPMScheduler
-import logging
-import denoisfm.shape_dataset as shape_dataset
 from tqdm import tqdm
 
-def get_dataset(name, base_dir): 
-    
+
+def get_dataset(name, base_dir):
+    """
+    Retrieves a testing dataset based on the specified name and base directory.
+
+    Args:
+        name (str): Must be one of the following: "FAUST_r", "SCAPE_r", "SHREC19_r", "FAUST_a", "SCAPE_a", "DT4D_intra", "DT4D_inter", "SMAL_iso".
+        base_dir (str): The base directory where dataset files are stored.
+
+    Returns:
+        tuple: A tuple containing:
+            - single_dataset: A dataset containing single shapes.
+            - pair_dataset: A dataset containing pairs of shapes.
+    """
     # dictionary mapping dataset names to their corresponding classes and parameters
     dataset_configs = {
-        "FAUST_r":   (shape_dataset.PairFaustDataset, {"data_root": f"{base_dir}/FAUST_r", "phase": "test"}),
-        "SCAPE_r":   (shape_dataset.PairScapeDataset, {"data_root": f"{base_dir}/SCAPE_r", "phase": "test"}),
-        "SHREC19_r": (shape_dataset.PairShrec19Dataset, {"data_root": f"{base_dir}/SHREC19_r", "phase": "test"}),
-        "FAUST_a":   (shape_dataset.PairDataset, {"data_root": f"{base_dir}/FAUST_a"}),
-        "SCAPE_a":   (shape_dataset.PairDataset, {"data_root": f"{base_dir}/SCAPE_a"}),
-        "DT4D_intra": (shape_dataset.PairDT4DDataset, {"data_root": f"{base_dir}/DT4D_r", "phase": "test", "inter_class": False}),
-        "DT4D_inter": (shape_dataset.PairDT4DDataset, {"data_root": f"{base_dir}/DT4D_r", "phase": "test", "inter_class": True}),
-        "SMAL_iso":  (shape_dataset.PairSmalDataset, {"data_root": f"{base_dir}/SMAL_r", "phase": "test", "category": False}),
+        "FAUST_r": (
+            shape_dataset.PairFaustDataset,
+            {"data_root": f"{base_dir}/FAUST_r", "phase": "test"},
+        ),
+        "SCAPE_r": (
+            shape_dataset.PairScapeDataset,
+            {"data_root": f"{base_dir}/SCAPE_r", "phase": "test"},
+        ),
+        "SHREC19_r": (
+            shape_dataset.PairShrec19Dataset,
+            {"data_root": f"{base_dir}/SHREC19_r", "phase": "test"},
+        ),
+        "FAUST_a": (shape_dataset.PairDataset, {"data_root": f"{base_dir}/FAUST_a"}),
+        "SCAPE_a": (shape_dataset.PairDataset, {"data_root": f"{base_dir}/SCAPE_a"}),
+        "DT4D_intra": (
+            shape_dataset.PairDT4DDataset,
+            {"data_root": f"{base_dir}/DT4D_r", "phase": "test", "inter_class": False},
+        ),
+        "DT4D_inter": (
+            shape_dataset.PairDT4DDataset,
+            {"data_root": f"{base_dir}/DT4D_r", "phase": "test", "inter_class": True},
+        ),
+        "SMAL_iso": (
+            shape_dataset.PairSmalDataset,
+            {"data_root": f"{base_dir}/SMAL_r", "phase": "test", "category": False},
+        ),
     }
 
     if name not in dataset_configs:
@@ -61,12 +91,19 @@ def run(args):
     with open(f"{exp_base_dir}/config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         
+    output_dir = f"results/{exp_name}/{args.dataset_name}"
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(f"{output_dir}/p2p", exist_ok=True)
+
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
-            logging.FileHandler(f'{exp_base_dir}/results_{args.dataset_name}.log'),  # Save logs to a file
+            logging.FileHandler(
+                f"{output_dir}/results_{args.dataset_name}.log"
+            ),  # Save logs to a file
             logging.StreamHandler(),  # Print logs to console
         ],
     )
@@ -79,22 +116,11 @@ def run(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     ddpm = conditional_unet.ConditionalUnet(config["ddpm_params"])
     checkpoint_name = args.checkpoint_name
-    
+
     accelerate.load_checkpoint_in_model(
         ddpm, f"{exp_base_dir}/checkpoints/{checkpoint_name}/model.safetensors"
     )
     ddpm.to(device)
-
-    # if "accelerate" in config and config["accelerate"]:
-    #     accelerate.load_checkpoint_in_model(
-    #         ddpm, f"{exp_base_dir}/checkpoints/{checkpoint_name}/model.safetensors"
-    #     )
-    # else:
-    #     ddpm.load_state_dict(
-    #         torch.load(
-    #             f"{exp_base_dir}/checkpoints/{checkpoint_name}", weights_only=True
-    #         )
-    #     )
 
     # noise scheduler
     noise_scheduler = DDPMScheduler(
@@ -102,7 +128,9 @@ def run(args):
     )
 
     # sign correction network
-    sign_corr_net = feature_extractor.DiffusionNet(**config["sign_net"]["diffusionnet_params"])
+    sign_corr_net = feature_extractor.DiffusionNet(
+        **config["sign_net"]["diffusionnet_params"]
+    )
 
     sign_corr_net.load_state_dict(
         torch.load(
@@ -118,7 +146,11 @@ def run(args):
     # Template shape
     ##########################################
 
-    shape_T = trimesh.load(f"data/template/{config['template_type']}/template.off", process=False, validate=False)
+    shape_T = trimesh.load(
+        f"data/template/{config['template_type']}/template.off",
+        process=False,
+        validate=False,
+    )
     shape_T = preprocessing_util.preprocessing_pipeline(
         shape_T.vertices, shape_T.faces, num_evecs=200, compute_distmat=False
     )
@@ -128,7 +160,7 @@ def run(args):
     # Test dataset
     ##########################################
 
-    single_dataset, pair_dataset = get_dataset(args.dataset_name, args.base_dir)
+    single_dataset, pair_dataset = get_dataset(args.dataset_name, args.data_dir)
     logging.info(f"Dataset {args.dataset_name} loaded")
 
     ##########################################
@@ -139,7 +171,7 @@ def run(args):
 
     for i in tqdm(range(len(single_dataset)), desc="Template stage"):
         shape_i = single_dataset[i]
-        
+
         # get template-wise maps for the shape
         Pi_Ti = template_stage(
             shape_i,
@@ -156,64 +188,76 @@ def run(args):
     ##########################################
     # Pairwise stage
     ##########################################
-    
+
     geo_err_list = []
-    os.makedirs(f"results/{exp_name}/{args.dataset_name}", exist_ok=True)
-    
+
     for i in tqdm(range(len(pair_dataset)), desc="Pairwise stage"):
         pair_i = pair_dataset[i]
         shape_1, shape_2 = pair_i["first"], pair_i["second"]
-        
+
         # get the template-wise maps for the two shapes
         Pi_T1 = Pi_Ti_list[shape_1["id"]]
         Pi_T2 = Pi_Ti_list[shape_2["id"]]
-        
+
         # convert the template-wise maps to pairwise ones, apply post-processing
-        Pi_21 = pairwise_stage(shape_1, shape_2, Pi_T1, Pi_T2, config)    
-        
+        Pi_21 = pairwise_stage(shape_1, shape_2, Pi_T1, Pi_T2, config)
+
         # save the pairwise map
         name_1, name_2 = shape_1["name"], shape_2["name"]
-        output_file = f"results/{exp_name}/{args.dataset_name}/{name_1}_{name_2}.pt"
+        output_file = f"{output_dir}/p2p/{name_1}_{name_2}.pt"
         torch.save(Pi_21, output_file)
-        
+
         # calculate the geodesic error
-        geo_err = calculate_geodesic_error(
-            shape_1["dist"],
-            shape_1["corr"], shape_2["corr"],
-            Pi_21,
-            return_mean=True
-        ) * 100
+        geo_err = (
+            calculate_geodesic_error(
+                shape_1["dist"],
+                shape_1["corr"],
+                shape_2["corr"],
+                Pi_21,
+                return_mean=True,
+            )
+            * 100
+        )
         geo_err_list.append(geo_err)
-        
+
         logging.info(f"Geodesic error for {name_1} and {name_2}: {geo_err:.1f}")
-    
+
     logging.info("Pairwise stage finished")
-    
+
     geo_err_list = torch.tensor(geo_err_list)
-    logging.info(f"Mean geodesic error on {args.dataset_name}: {torch.mean(geo_err_list):.1f}")
-    
+    logging.info(
+        f"Mean geodesic error on {args.dataset_name}: {torch.mean(geo_err_list):.1f}"
+    )
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Test the model on a dataset"
-    )
+    parser = argparse.ArgumentParser(description="Test the model on a dataset")
     dataset_choices = [
-        "FAUST_r", "SCAPE_r", "SHREC19_r",
-        "FAUST_a", "SCAPE_a",
-        "DT4D_intra", "DT4D_inter",
-        "SMAL_iso"
+        "FAUST_r",
+        "SCAPE_r",
+        "SHREC19_r",
+        "FAUST_a",
+        "SCAPE_a",
+        "DT4D_intra",
+        "DT4D_inter",
+        "SMAL_iso",
     ]
 
-    parser.add_argument("--exp_name", type=str, required=True)
-    parser.add_argument("--checkpoint_name", type=str, required=True)
-    parser.add_argument("--dataset_name", type=str, choices=dataset_choices, required=True)
+    parser.add_argument("--exp_name", type=str, required=True,
+                        help="Name of the experiment, e.g. ddpm_64"
+                        )
+    parser.add_argument("--checkpoint_name", type=str, required=True,
+                        help="Name of the checkpoint, e.g. epoch_99")
     parser.add_argument(
-        "--base_dir",
+        "--dataset_name", type=str, choices=dataset_choices, required=True,
+        help="Name of the test dataset, e.g. FAUST_r"
+    )
+    parser.add_argument(
+        "--data_dir",
         type=str,
         required=True,
-        help="Base directory where datasets are stored"
+        help="Path to the directory containing the dataset files, e.g. data/test",
     )
-
 
     args = parser.parse_args()
 

@@ -11,6 +11,23 @@ def template_map_to_pairwise_map(
     sample_size,
     zoomout_step
     ):
+    """
+    Converts template-wise point-to-point maps into a pairwise map, refines them 
+    with the ZoomOut technique and then converts into a point-to-point map.
+
+    Args:
+        Pi_T1 (torch.Tensor): A tensor representing the template-wise point-to-point map from shape 1 to shape T.
+        Pi_T2 (torch.Tensor): A tensor representing the template-wise point-to-point map from shape 2 to shape T.
+        Phi_1 (torch.Tensor): The eigenbasis of shape 1.
+        Phi_2 (torch.Tensor): The eigenbasis of shape 2.
+        A_2 (torch.Tensor): The vertex-area matrix of shape 2.
+        sample_size (int): The number of eigenvectors used in the functional map calculation.
+        zoomout_step (int): The step size for the ZoomOut technique to refine the functional map.
+
+    Returns:
+        torch.Tensor: The refined pairwise point-to-point map between shape 1 and shape 2.
+    """
+    
     # assert that the number of eigenvectors - sample_size is divisible by zoomout_step
     assert (Phi_1.shape[1] - sample_size) % zoomout_step == 0, \
         f'Number of eigenvectors to zoom out must be divisible by zoomout_step: {Phi_1.shape[1] - sample_size} % {zoomout_step} != 0'
@@ -48,7 +65,21 @@ def pairwise_stage(
     Pi_T1_list, Pi_T2_list,
     config
 ):
-       
+    """
+    Convert the template-wise maps to pairwise, refines them using ZoomOut technique 
+    and selects a medoid map from the generated pairwise maps.
+
+    Args:
+        shape_1 (dict): A dictionary representing shape 1, containing the vertices, faces, and spectral operators.
+        shape_2 (dict): A dictionary representing shape 2, same format as shape_1.
+        Pi_T1_list (torch.Tensor): A tensor containing a list of template-wise point-to-point maps for shape 1.
+        Pi_T2_list (torch.Tensor): A tensor containing a list of template-wise point-to-point maps for shape 2.
+        config (dict): A dictionary containing configuration parameters
+        
+    Returns:
+        torch.Tensor: The medoid point-to-point map between shape 1 and shape 2.
+    """
+           
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # full eigenbasis (200) of shapes 1 and 2 

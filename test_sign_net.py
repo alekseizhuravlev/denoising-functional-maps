@@ -9,11 +9,25 @@ from denoisfm.sign_correction import learned_sign_correction
 from test_on_dataset import get_dataset
 from train_sign_net import random_signs
 from tqdm import tqdm
+import argparse
+import os
 
 
-def mean_sign_accuracy(signs_1, signs_2, P_diag_1, P_diag_2):
-    correct_predictions = (signs_1 * signs_2).int() ==\
-        torch.sign(P_diag_1) * torch.sign(P_diag_2)
+def mean_sign_accuracy(signs_1, signs_2, pred_signs_1, pred_signs_2):
+    """
+    Computes the mean number of equal eigenvectors after sign correction.
+
+    Args:
+        signs_1 (torch.Tensor): The first set of random signs (+1 or -1) for the eigenvectors.
+        signs_2 (torch.Tensor): The second set of random signs (+1 or -1) for the eigenvectors.
+        pred_signs_1 (torch.Tensor): The predicted signs for the first set.
+        pred_signs_2 (torch.Tensor): The predicted signs for the second set.
+
+    Returns:
+        torch.Tensor: A scalar tensor representing the mean sign accuracy as a value between 0 and 1.
+    """
+
+    correct_predictions = (signs_1 * signs_2).int() == (pred_signs_1 * pred_signs_2).int()
     sign_accuracy = correct_predictions.float().mean()
 
     return sign_accuracy
@@ -31,15 +45,20 @@ def run(args):
     exp_base_folder = f"checkpoints/sign_net/{exp_name}"
     with open(f"{exp_base_folder}/config.yaml", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-        
+
+    output_dir = f"results/{exp_name}"
+    os.makedirs(output_dir, exist_ok=True)
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
-        logging.FileHandler(f'{exp_base_folder}/results_{args.dataset_name}.log'),  # Save logs to a file
-        logging.StreamHandler(),  # Print logs to console
-    ],
+            logging.FileHandler(
+                f"{output_dir}/results_{args.dataset_name}.log"
+            ),  # Save logs to a file
+            logging.StreamHandler(),  # Print logs to console
+        ],
     )
 
     #######################################################
@@ -59,7 +78,7 @@ def run(args):
     sign_net.to(device)
 
     # Test dataset
-    single_dataset, _ = get_dataset(args.dataset_name, args.base_dir)
+    single_dataset, _ = get_dataset(args.dataset_name, args.data_dir)
     # load all test shapes into memory
     single_dataset = [single_dataset[i] for i in range(len(single_dataset))]
     #######################################################
@@ -69,7 +88,7 @@ def run(args):
     for _ in tqdm(range(args.n_epochs)):
         for curr_idx in range(len(single_dataset)):
             shape = single_dataset[curr_idx]
-            
+
             Phi = shape["evecs"][:, : config["sample_size"]].to(device)
 
             ##############################################
@@ -80,8 +99,8 @@ def run(args):
 
             # evecs with random signs
             Phi_1 = Phi * signs_1
-            Phi_2 = Phi * signs_2  
-                        
+            Phi_2 = Phi * signs_2
+
             # get the diagonal elements of the projection matrix
             P_diag_1, _ = learned_sign_correction(
                 sign_net,
@@ -89,33 +108,36 @@ def run(args):
                 Phi_1,
                 config,
             )
+            pred_signs_1 = torch.sign(P_diag_1)
+
             P_diag_2, _ = learned_sign_correction(
                 sign_net,
                 shape,
                 Phi_2,
                 config,
             )
+            pred_signs_2 = torch.sign(P_diag_2)
 
             # evaluation metric
-            sign_accuracy = mean_sign_accuracy(signs_1, signs_2, P_diag_1, P_diag_2)
+            sign_accuracy = mean_sign_accuracy(
+                signs_1, signs_2, pred_signs_1, pred_signs_2
+            )
             sign_accuracy_list.append(sign_accuracy.item())
 
-    logging.info(f"Dataset: {args.dataset_name}, sample size: {config['sample_size']}, checkpoint {args.checkpoint_name}")
-    logging.info(f"Sign accuracy: {np.mean(sign_accuracy_list) * 100:.1f}%")
+    logging.info(
+        f"Dataset: {args.dataset_name}, sample size: {config['sample_size']}, checkpoint {args.checkpoint_name}"
+    )
+    logging.info(f"Sign correction accuracy: {np.mean(sign_accuracy_list) * 100:.1f}%")
 
 
-if __name__ == '__main__':
-    import argparse
-
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_name", type=str, required=True)
-    parser.add_argument("--dataset_name", type=str, required=True)
-    parser.add_argument("--base_dir", type=str, required=True)
     parser.add_argument("--checkpoint_name", type=str, required=True)
-    parser.add_argument("--n_epochs", type=int, default=1)
-    
-    args = parser.parse_args()
+    parser.add_argument("--dataset_name", type=str, required=True)
+    parser.add_argument("--data_dir", type=str, required=True)
+    parser.add_argument("--n_epochs", type=int, default=100)
 
-    # python /home/s94zalek_hpc/DenoisingFunctionalMaps/test_sign_net.py --exp_name sign_net_64_humans --dataset_name FAUST_r --base_dir /lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/test --n_epochs 10
+    args = parser.parse_args()
 
     run(args)

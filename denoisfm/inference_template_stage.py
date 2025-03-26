@@ -1,9 +1,7 @@
 import denoisfm.utils.fmap_util as fmap_util
 import torch
-
+from denoisfm.sign_correction import area_weighted_projection, learned_sign_correction
 from tqdm import tqdm
-
-from denoisfm.sign_correction import learned_sign_correction, area_weighted_projection
 
 
 def get_signs_and_conditioning(
@@ -11,9 +9,25 @@ def get_signs_and_conditioning(
     sign_corr_net,
     config,
 ):
+    """
+    Computes the signs of eigenvectors and conditioning matrices for a given shape using a learned sign correction network.
+
+    Args:
+        shape (dict): The shape dictionary containing vertices, faces, and spectral operators.
+        sign_corr_net (torch.nn.Module): The sign correction network .
+        config (dict): Configuration dictionary
+
+    Returns:
+        torch.Tensor: A tensor containing the signs for each sample.
+        torch.Tensor: A tensor containing the conditioning vectors (y) for each sample.
+
+    Notes:
+        The function computes the signs and conditioning vectors multiple times (as defined by `num_samples_total`)
+    """
+
     device = next(sign_corr_net.parameters()).device
 
-    Phi = shape["evecs"][:, :config["ddpm_params"]["sample_size"]].to(device)
+    Phi = shape["evecs"][:, : config["ddpm_params"]["sample_size"]].to(device)
     A = shape["mass"].to(device)
 
     signs_list = []
@@ -34,7 +48,7 @@ def get_signs_and_conditioning(
         # correct the eigenvectors
         Phi_corrected = Phi * signs
 
-        # conditioning y = correction_vector @ area mat @ corrected evecs 
+        # conditioning y = correction_vector @ area mat @ corrected evecs
         y = area_weighted_projection(Sigma, Phi_corrected, A)
 
         signs_list.append(signs)
@@ -45,11 +59,6 @@ def get_signs_and_conditioning(
 
     return signs_list, y_list
 
-# y = torch.nn.functional.normalize(
-#     correc_vector.transpose(0, 1) @ mass_mat, p=2, dim=1
-# ) @ torch.nn.functional.normalize(evecs_corrected, p=2, dim=0)
-
-
 
 def template_stage(
     shape_1,
@@ -59,6 +68,23 @@ def template_stage(
     noise_scheduler,
     config,
 ):
+    """
+    Performs the template stage of the model, where the signs of eigenvectors are corrected,
+    conditioning matrices are generated, the forward diffusion process is run to obtain the template-wise functional maps,
+    and the functional maps are converted to point-to-point maps.
+
+    Args:
+        shape_1 (dict): The first shape dictionary containing vertices, faces, and spectral operators.
+        shape_T (dict): The template shape dictionary, same format as shape_1.
+        ddpm (torch.nn.Module): The DDPM model used for denoising the samples.
+        sign_corr_net (torch.nn.Module): The sign correction network.
+        noise_scheduler (DDPMScheduler): The noise scheduler used during the denoising process.
+        config (dict): Configuration dictionary
+
+    Returns:
+        torch.Tensor: The estimated point-to-point maps (Pi_T1) between the template and the test shape.
+    """
+
     device = next(sign_corr_net.parameters()).device
 
     sample_size = config["ddpm_params"]["sample_size"]

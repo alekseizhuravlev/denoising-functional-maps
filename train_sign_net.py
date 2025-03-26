@@ -56,8 +56,9 @@ def random_signs(n):
 
 if __name__ == "__main__":
     config = {
-        "name": "sign_net_64_smal_old_data",
-        "data_dir": "/home/s94zalek_hpc/shape_matching/data_sign_training/train/SMAL_isoRemesh_0.2_0.8_nocat",
+        "name": "sign_net_64_smal_new_proj",
+        "dataset_base_dir": "/home/s94zalek_hpc/DenoisingFunctionalMaps/data/sign_net",
+        "train_dataset": "sign_training_animals",
         "output_dir": "/home/s94zalek_hpc/DenoisingFunctionalMaps/checkpoints/sign_net",
         "sample_size": 64,
         # "evecs_per_correc": [[32, 1]],
@@ -95,7 +96,7 @@ if __name__ == "__main__":
 
     # load the shapes and spectral operators
     train_shapes = load_cached_shapes(
-        input_dir=config["data_dir"],
+        input_dir=f"{config['dataset_base_dir']}/{config['train_dataset']}",
         k_eig=config["diffusionnet_params"]["k_eig"],
     )
 
