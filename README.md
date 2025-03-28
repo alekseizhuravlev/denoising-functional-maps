@@ -4,7 +4,7 @@
 
 ### [Project Page](https://alekseizhuravlev.github.io/denoising-functional-maps/) | [Paper](https://arxiv.org/pdf/2503.01845) | [Data]()
 
-![Teaser](docs/assets/Teaser_figure_upd.jpg)
+![Teaser](assets/teaser.jpg)
 
 
 ## Installation
@@ -88,7 +88,7 @@ Our model consists of two components: the sign correction network and the DDPM. 
 
 ### 1. Sign Correction Network
 
-![Sign Correction](docs/assets/Method_sign_correction_upd.jpg)
+![Sign Correction](assets/method_sign_correction.jpg)
 
 
 Resolves the sign ambiguity of eigenvectors of the Laplacian. The learned features are used as conditioning for the DDPM. The sign-corrected eigenspace likely has other interesting properties, so feel free to use it for your own applications.
@@ -107,7 +107,7 @@ Check the `train_sign_net.py` and modify the config dictionary to your needs. Th
 
 ### 2. DDPM
 
-![DDPM](docs/assets/Method_figure_double_upd.jpg)
+![DDPM](assets/method_ddpm.jpg)
 
 Predicts the template-wise functional map using the sign-corrected eigenvectors and the features learned by the sign net. 
 
