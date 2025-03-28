@@ -2,8 +2,6 @@
 *.pth
 *.safetensors
 *.yaml
-*.off
-*.vts
 *.pyc
 *.npy
 *.npz
@@ -11,9 +9,9 @@
 *.png
 *.err
 *.out
-*.txt
 denoisfm/data_generation/smal_online/*
 !denoisfm/data_generation/smal_online/.gitkeep
 denoisfm/data_generation/smpl_webuser/*
 !denoisfm/data_generation/smpl_webuser/.gitkeep
 events.out.tfevents.*
+!data
