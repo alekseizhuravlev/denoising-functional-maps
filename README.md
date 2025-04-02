@@ -2,7 +2,7 @@
 
 *Aleksei Zhuravlev*, *Zorah Lähner*, *Vladislav Golyanik*
 
-### [Project Page](https://alekseizhuravlev.github.io/denoising-functional-maps/) | [Paper](https://arxiv.org/pdf/2503.01845) | [Data]()
+### [Project Page](https://alekseizhuravlev.github.io/denoising-functional-maps/) | [Paper](https://arxiv.org/pdf/2503.01845) | [Data](https://drive.google.com/drive/folders/1_lb59YmxMGUpPeqKwHBwEAag_UhQoi24?usp=sharing)
 
 ![Teaser](assets/teaser.jpg)
 
@@ -19,7 +19,7 @@ pip install -r requirements.txt --no-cache-dir
 
 ## Data and Checkpoints
 
-In this [Google Drive]() folder you can find:
+In this [Google Drive](https://drive.google.com/drive/folders/1_lb59YmxMGUpPeqKwHBwEAag_UhQoi24?usp=sharing) folder you can find:
 - `checkpoints` - pretrained models for the DDPM and the sign correction network
 - `data/test` - test datasets with ground truth correspondences
 - `data/train` - *(optional)* train datasets for the DDPM and the sign correction network.
