@@ -15,3 +15,4 @@ denoisfm/data_generation/smpl_webuser/*
 !denoisfm/data_generation/smpl_webuser/.gitkeep
 events.out.tfevents.*
 !data
+*.zip

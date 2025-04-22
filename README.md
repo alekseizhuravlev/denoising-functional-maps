@@ -22,8 +22,8 @@ pip install -r requirements.txt --no-cache-dir
 In this [Google Drive](https://drive.google.com/drive/folders/1_lb59YmxMGUpPeqKwHBwEAag_UhQoi24?usp=sharing) folder you can find:
 - `checkpoints` - pretrained models for the DDPM and the sign correction network
 - `data/test` - test datasets with ground truth correspondences
-- `data/train` - *(soon)* train datasets for the DDPM and the sign correction network.
-- `results` - *(soon)* precomputed point-to-point correspondences obtained by our models for the test datasets.
+- `data/train` - 🌟 *(new)* train datasets for the DDPM and the sign correction network.
+- `results` - 🌟 *(new)* precomputed point-to-point correspondences obtained by our models for the test datasets.
 
 Download the `checkpoints` to the root of the repository. The `data` directory can be placed anywhere on your machine.
 
