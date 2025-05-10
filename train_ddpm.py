@@ -34,7 +34,6 @@ class DatasetDDPM(torch.utils.data.Dataset):
 
 
 def run(args):
-    
     torch.manual_seed(1)
     np.random.seed(1)
     random.seed(1)
@@ -44,11 +43,12 @@ def run(args):
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    
+
     # configuration
     config = {
         "exp_name": args.exp_name,
-        "dataset_base_dir": "/tmp",
+        # "dataset_base_dir": "/tmp",
+        "dataset_base_dir": args.dataset_base_dir,
         "dataset_name": args.dataset_name,
         "n_epochs": 100,
         "checkpoint_every": 10,
@@ -126,7 +126,6 @@ def run(args):
     ### Training
     curr_iter = 0
     for epoch in range(config["n_epochs"]):
-        
         for x, y in tqdm(
             train_dataloader,
             total=len(train_dataloader),
@@ -137,7 +136,9 @@ def run(args):
             noise = torch.randn_like(x)
 
             timesteps = (
-                torch.randint(0, noise_scheduler.config.num_train_timesteps, (x.shape[0],))
+                torch.randint(
+                    0, noise_scheduler.config.num_train_timesteps, (x.shape[0],)
+                )
                 .long()
                 .to(accelerator.device)
             )
@@ -157,16 +158,16 @@ def run(args):
 
             opt.step()
             lr_scheduler.step()
-            
+
             # log the loss every 10% of the dataset
             if curr_iter % (len(train_dataloader) // 10) == 0:
                 accelerator.log({"loss/train": loss.item()}, step=curr_iter)
-            
+
             curr_iter += 1
-            
+
         if accelerator.is_local_main_process:
             logging.info(f"Epoch {epoch}, loss: {loss.item():.4f}")
-            
+
         # save the model checkpoint
         if epoch > 0 and epoch % config["checkpoint_every"] == 0:
             accelerator.wait_for_everyone()
@@ -179,14 +180,45 @@ def run(args):
 
 
 if __name__ == "__main__":
+    # for an example of running the code, see scripts/train_ddpm_slurm.sh
+    # accelerate launch train_ddpm.py ...
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--exp_name", type=str)
-    parser.add_argument("--dataset_name", type=str)
+    parser.add_argument(
+        "--exp_name",
+        type=str,
+        help="Name of the experiment directory where checkpoints will be saved",
+    )
 
-    parser.add_argument("--sample_size", type=int)
+    parser.add_argument(
+        "--dataset_base_dir",
+        type=str,
+        help="Base directory of the training dataset",
+        default="/tmp",
+    )
+    parser.add_argument(
+        "--dataset_name",
+        type=str, 
+        help="Name of the training dataset in the base dir"
+    )
 
-    parser.add_argument("--block_out_channels", type=str)
+    parser.add_argument(
+        "--sample_size",
+        type=int,
+        help="Size of the functional map",
+        choices=[32, 64, 96],
+    )
+
+    parser.add_argument(
+        "--block_out_channels",
+        type=str,
+        help="Comma separated list of block out channels of DDPM",
+        choices=[
+            "32,64,64", # for 32x32 functional maps
+            "64,128,128" # for 64x64 and 96x96 functional maps
+        ],
+    )
 
     args = parser.parse_args()
 

@@ -22,9 +22,9 @@ export PYTHONPATH="${PYTHONPATH}:/home/s94zalek_hpc/DenoisingFunctionalMaps"
 # basic parameters
 ###########################################
 
-dataset_name=SMAL_sign_net_64_smal_new_proj
+dataset_name=SMAL_sign_net_64_smal
 
-sign_net_name=sign_net_64_smal_new_proj
+sign_net_name=sign_net_64_smal
 
 input_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/base/SMAL
 output_dir=/lustre/mlnvme/data/s94zalek_hpc-shape_matching/data_denoisfm/train/ddpm
