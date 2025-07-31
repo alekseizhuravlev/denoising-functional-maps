@@ -7,6 +7,7 @@ import accelerate
 import denoisfm.conditional_unet as conditional_unet
 import denoisfm.feature_extractor as feature_extractor
 import denoisfm.utils.preprocessing_util as preprocessing_util
+import denoisfm.map_selection as map_selection
 import numpy as np
 import torch
 import trimesh
@@ -97,7 +98,7 @@ def run(args):
         shape_1.vertices, shape_1.faces, num_evecs=200, compute_distmat=True
     )
     shape_2 = preprocessing_util.preprocessing_pipeline(
-        shape_2.vertices, shape_2.faces, num_evecs=200, compute_distmat=False
+        shape_2.vertices, shape_2.faces, num_evecs=200, compute_distmat=True
     )
     logging.info("Shapes 1 and 2 loaded")
 
@@ -105,6 +106,7 @@ def run(args):
     # Template stage
     ##########################################
 
+    # shape 1
     Pi_T1 = template_stage(
         shape_1,
         shape_T,
@@ -113,8 +115,18 @@ def run(args):
         noise_scheduler,
         config,
     )
+    
+    Pi_T1_best = map_selection.select_p2p_map(
+        Pi_T1,
+        shape_1['verts'],
+        shape_T['L'], 
+        shape_1['dist'],
+        num_samples_selection=config["inference"]["num_samples_selection"]
+    ).cpu()  
+      
     logging.info("Template stage for shape 1 finished")
 
+    # shape 2
     Pi_T2 = template_stage(
         shape_2,
         shape_T,
@@ -123,6 +135,15 @@ def run(args):
         noise_scheduler,
         config,
     )
+    
+    Pi_T2_best = map_selection.select_p2p_map(
+        Pi_T2,
+        shape_2['verts'],
+        shape_T['L'], 
+        shape_2['dist'],
+        num_samples_selection=config["inference"]["num_samples_selection"]
+    ).cpu()
+    
     logging.info("Template stage for shape 2 finished")
 
     # save the template-wise maps
@@ -132,8 +153,8 @@ def run(args):
     save_dir = f"results/{exp_name}/custom_pair"
     os.makedirs(save_dir, exist_ok=True)
 
-    torch.save(Pi_T1, f"{save_dir}/{name_1}_template.pt")
-    torch.save(Pi_T2, f"{save_dir}/{name_2}_template.pt")
+    torch.save(Pi_T1_best, f"{save_dir}/{name_1}_template.pt")
+    torch.save(Pi_T2_best, f"{save_dir}/{name_2}_template.pt")
 
     ##########################################
     # Pairwise stage
